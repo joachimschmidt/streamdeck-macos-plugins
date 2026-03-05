@@ -1,0 +1,71 @@
+{
+  "id": "com.local.calendar-events.layout.calendar",
+  "items": [
+    {
+      "key": "time",
+      "type": "text",
+      "rect": [6, 2, 130, 18],
+      "font": {
+        "size": 13,
+        "weight": 600
+      },
+      "alignment": "left",
+      "color": "#AACCFF"
+    },
+    {
+      "key": "nav",
+      "type": "text",
+      "rect": [140, 2, 56, 18],
+      "font": {
+        "size": 12,
+        "weight": 400
+      },
+      "alignment": "right",
+      "color": "#888888"
+    },
+    {
+      "key": "meetingIcon",
+      "type": "text",
+      "rect": [6, 24, 20, 22],
+      "font": {
+        "size": 14,
+        "weight": 400
+      },
+      "alignment": "left",
+      "color": "#FFFFFF"
+    },
+    {
+      "key": "title",
+      "type": "text",
+      "rect": [28, 24, 168, 22],
+      "font": {
+        "size": 14,
+        "weight": 700
+      },
+      "alignment": "left",
+      "color": "#FFFFFF"
+    },
+    {
+      "key": "timeUntil",
+      "type": "text",
+      "rect": [6, 52, 190, 18],
+      "font": {
+        "size": 12,
+        "weight": 400
+      },
+      "alignment": "left",
+      "color": "#AAAAAA"
+    },
+    {
+      "key": "status",
+      "type": "text",
+      "rect": [6, 74, 190, 18],
+      "font": {
+        "size": 11,
+        "weight": 400
+      },
+      "alignment": "center",
+      "color": "#66BB6A"
+    }
+  ]
+}

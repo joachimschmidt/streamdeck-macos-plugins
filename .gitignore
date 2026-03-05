@@ -1,0 +1,6 @@
+node_modules/
+*.sdPlugin/
+.DS_Store
+
+# Compiled binaries (rebuilt during build)
+sd-bt-connect/helpers/bt-info

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Calendar Events Settings</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 12px;
+      color: #d8d8d8;
+      background: #2d2d2d;
+      padding: 8px;
+    }
+    .sdpi-wrapper { padding: 4px 0; }
+    .sdpi-heading {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #999;
+      padding: 8px 0 4px 0;
+      border-bottom: 1px solid #444;
+      margin-bottom: 6px;
+    }
+    .sdpi-hint {
+      font-size: 10px;
+      color: #777;
+      padding: 2px 0 6px 0;
+    }
+    button {
+      display: block;
+      width: 100%;
+      margin: 6px 0;
+      padding: 6px 12px;
+      background: #0078d4;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    button:hover { background: #1a88dd; }
+    button.secondary {
+      background: #444;
+    }
+    button.secondary:hover { background: #555; }
+    #calendarList {
+      margin: 6px 0;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+    .cal-item {
+      display: flex;
+      align-items: center;
+      padding: 5px 4px;
+      border-bottom: 1px solid #3a3a3a;
+      cursor: pointer;
+    }
+    .cal-item:hover { background: #383838; }
+    .cal-item input[type="checkbox"] { margin-right: 8px; flex-shrink: 0; }
+    .cal-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+    .cal-info { flex: 1; min-width: 0; }
+    .cal-title {
+      font-size: 12px;
+      color: #d8d8d8;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .cal-source {
+      font-size: 10px;
+      color: #777;
+    }
+    #statusBar {
+      margin-top: 6px;
+      padding: 6px;
+      background: #1a1a1a;
+      border-radius: 3px;
+      font-size: 11px;
+      color: #aaa;
+      text-align: center;
+      min-height: 24px;
+    }
+    #statusBar.error { color: #ef5350; }
+    #statusBar.ok { color: #66bb6a; }
+  </style>
+</head>
+<body>
+  <div class="sdpi-wrapper">
+    <div id="mainSection">
+      <div class="sdpi-heading">Calendars</div>
+      <div class="sdpi-hint">Select which calendars to show events from. If none selected, all calendars are shown.</div>
+      <div id="calendarList"><em style="color:#666">Loading calendars...</em></div>
+
+      <button id="refreshCalBtn" class="secondary">Reload Calendar List</button>
+      <button id="refreshEventsBtn">Refresh Events Now</button>
+    </div>
+
+    <div id="statusBar">Reads from macOS Calendar</div>
+  </div>
+
+<script>
+  var websocket = null;
+  var piUUID = null;
+  var settings = {};
+  var calendarsLoaded = false;
+
+  function connectElgatoStreamDeckSocket(port, uuid, registerEvent, info, actionInfo) {
+    piUUID = uuid;
+    var actionData = JSON.parse(actionInfo);
+    settings = actionData.payload.settings || {};
+
+    websocket = new WebSocket("ws://127.0.0.1:" + port);
+
+    websocket.onopen = function () {
+      websocket.send(JSON.stringify({
+        event: registerEvent,
+        uuid: uuid
+      }));
+      // Ask plugin for calendar list
+      sendToPlugin({ action: "listCalendars" });
+    };
+
+    websocket.onmessage = function (evt) {
+      var data = JSON.parse(evt.data);
+      if (data.event === "didReceiveSettings") {
+        settings = data.payload.settings || {};
+      }
+      if (data.event === "sendToPropertyInspector") {
+        var payload = data.payload || {};
+        if (payload.action === "calendarList") {
+          renderCalendars(payload.calendars || [], payload.error);
+        }
+      }
+    };
+  }
+
+  function sendToPlugin(payload) {
+    if (websocket && websocket.readyState === WebSocket.OPEN) {
+      websocket.send(JSON.stringify({
+        event: "sendToPlugin",
+        context: piUUID,
+        payload: payload
+      }));
+    }
+  }
+
+  function saveSettings() {
+    if (websocket && websocket.readyState === WebSocket.OPEN) {
+      websocket.send(JSON.stringify({
+        event: "setSettings",
+        context: piUUID,
+        payload: settings
+      }));
+    }
+  }
+
+  function renderCalendars(calendars, error) {
+    var container = document.getElementById("calendarList");
+    var statusBar = document.getElementById("statusBar");
+
+    if (error) {
+      container.innerHTML = "<em style='color:#ef5350'>" + escapeHtml(error) + "</em>";
+      statusBar.textContent = "Error loading calendars";
+      statusBar.className = "error";
+      return;
+    }
+
+    if (calendars.length === 0) {
+      container.innerHTML = "<em style='color:#666'>No calendars found</em>";
+      return;
+    }
+
+    var selectedIds = (settings.calendarIds || "").split(",").filter(Boolean);
+    var html = "";
+
+    calendars.forEach(function (cal) {
+      var checked = selectedIds.indexOf(cal.id) >= 0 ? "checked" : "";
+      html += '<label class="cal-item">'
+        + '<input type="checkbox" value="' + escapeHtml(cal.id) + '" ' + checked + ' />'
+        + '<span class="cal-dot" style="background:' + escapeHtml(cal.color) + '"></span>'
+        + '<span class="cal-info">'
+        + '<div class="cal-title">' + escapeHtml(cal.title) + '</div>'
+        + '<div class="cal-source">' + escapeHtml(cal.source) + '</div>'
+        + '</span></label>';
+    });
+
+    container.innerHTML = html;
+    calendarsLoaded = true;
+
+    // Bind change events
+    var checkboxes = container.querySelectorAll("input[type=checkbox]");
+    checkboxes.forEach(function (cb) {
+      cb.addEventListener("change", onCalendarToggle);
+    });
+
+    statusBar.textContent = calendars.length + " calendars available";
+    statusBar.className = "ok";
+  }
+
+  function onCalendarToggle() {
+    var checkboxes = document.querySelectorAll("#calendarList input[type=checkbox]:checked");
+    var ids = [];
+    checkboxes.forEach(function (cb) { ids.push(cb.value); });
+    settings.calendarIds = ids.join(",");
+    saveSettings();
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement("div");
+    div.textContent = str || "";
+    return div.innerHTML;
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("refreshCalBtn").addEventListener("click", function () {
+      document.getElementById("calendarList").innerHTML = "<em style='color:#666'>Loading...</em>";
+      sendToPlugin({ action: "listCalendars" });
+    });
+
+    document.getElementById("refreshEventsBtn").addEventListener("click", function () {
+      sendToPlugin({ action: "refresh" });
+      document.getElementById("statusBar").textContent = "Refreshing...";
+      document.getElementById("statusBar").className = "";
+    });
+
+  });
+</script>
+</body>
+</html>

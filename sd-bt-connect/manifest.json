@@ -1,0 +1,42 @@
+{
+  "Actions": [
+    {
+      "Controllers": ["Keypad"],
+      "Icon": "imgs/action",
+      "Name": "BT Connect",
+      "PropertyInspector": "ui/settings.html",
+      "States": [
+        {
+          "Image": "imgs/action",
+          "TitleAlignment": "bottom",
+          "FontSize": "9"
+        }
+      ],
+      "UUID": "com.local.bt-connect.toggle"
+    }
+  ],
+  "Author": "Local",
+  "Category": "Bluetooth",
+  "CategoryIcon": "imgs/category",
+  "CodePath": "bin/plugin.js",
+  "PropertyInspectorPath": "ui/settings.html",
+  "Description": "Monitor and toggle Bluetooth device connections",
+  "Icon": "imgs/plugin",
+  "Name": "BT Connect",
+  "Nodejs": {
+    "Version": "20",
+    "Debug": "enabled"
+  },
+  "OS": [
+    {
+      "Platform": "mac",
+      "MinimumVersion": "10.15"
+    }
+  ],
+  "SDKVersion": 2,
+  "Software": {
+    "MinimumVersion": "6.4"
+  },
+  "UUID": "com.local.bt-connect",
+  "Version": "0.1.0"
+}

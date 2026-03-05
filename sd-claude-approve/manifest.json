@@ -1,0 +1,40 @@
+{
+  "Actions": [
+    {
+      "Controllers": ["Keypad"],
+      "Icon": "imgs/action",
+      "Name": "Claude Approve",
+      "States": [
+        {
+          "Image": "imgs/action",
+          "TitleAlignment": "bottom",
+          "FontSize": "9"
+        }
+      ],
+      "UUID": "com.local.claude-approve.button"
+    }
+  ],
+  "Author": "Local",
+  "Category": "Claude",
+  "CategoryIcon": "imgs/category",
+  "CodePath": "bin/plugin.js",
+  "Description": "Approve Claude Code tool calls from Stream Deck",
+  "Icon": "imgs/plugin",
+  "Name": "Claude Approve",
+  "Nodejs": {
+    "Version": "20",
+    "Debug": "enabled"
+  },
+  "OS": [
+    {
+      "Platform": "mac",
+      "MinimumVersion": "10.15"
+    }
+  ],
+  "SDKVersion": 2,
+  "Software": {
+    "MinimumVersion": "6.4"
+  },
+  "UUID": "com.local.claude-approve",
+  "Version": "0.1.0"
+}

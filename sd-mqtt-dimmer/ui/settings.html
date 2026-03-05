@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>MQTT Dimmer Settings</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 12px;
+            color: #d8d8d8;
+            background: #2d2d2d;
+            margin: 0;
+            padding: 12px;
+        }
+        .sdpi-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .sdpi-item {
+            display: flex;
+            align-items: center;
+            min-height: 28px;
+        }
+        .sdpi-item.top {
+            align-items: flex-start;
+        }
+        .sdpi-item label {
+            flex: 0 0 90px;
+            text-align: right;
+            padding-right: 10px;
+            font-weight: 500;
+        }
+        .sdpi-item.top label {
+            padding-top: 5px;
+        }
+        .sdpi-item input, .sdpi-item textarea {
+            flex: 1;
+            background: #3b3b3b;
+            border: 1px solid #555;
+            color: #d8d8d8;
+            padding: 5px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-family: inherit;
+        }
+        .sdpi-item textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        .sdpi-item input:focus, .sdpi-item textarea:focus {
+            border-color: #0078d4;
+            outline: none;
+        }
+        .sdpi-heading {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #999;
+            margin-top: 6px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #444;
+        }
+        .sdpi-hint {
+            font-size: 10px;
+            color: #888;
+            padding-left: 100px;
+            margin-top: -4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sdpi-wrapper">
+        <div class="sdpi-heading">MQTT Connection</div>
+
+        <div class="sdpi-item">
+            <label>Broker URL</label>
+            <input id="mqttBroker" placeholder="mqtt://192.168.1.100:1883">
+        </div>
+        <div class="sdpi-hint">e.g. mqtt://homeassistant.local:1883</div>
+
+        <div class="sdpi-item">
+            <label>Username</label>
+            <input id="mqttUser" placeholder="(optional)">
+        </div>
+
+        <div class="sdpi-item">
+            <label>Password</label>
+            <input id="mqttPass" type="password" placeholder="(optional)">
+        </div>
+
+        <div class="sdpi-heading">Lights</div>
+
+        <div class="sdpi-item">
+            <label>Display Name</label>
+            <input id="displayName" placeholder="e.g. Salon Lights">
+        </div>
+        <div class="sdpi-hint">Label shown on the dial (optional)</div>
+
+        <div class="sdpi-item top">
+            <label>Light Names</label>
+            <textarea id="lightName" placeholder="Salon Desk Lamp Bulb 1&#10;Salon Desk Lamp Bulb 2&#10;Salon Desk Lamp Bulb 3"></textarea>
+        </div>
+        <div class="sdpi-hint">Zigbee2MQTT friendly names — one per line or comma-separated</div>
+
+        <div class="sdpi-heading">Behavior</div>
+
+        <div class="sdpi-item">
+            <label>Step Size</label>
+            <input id="stepSize" type="number" min="1" max="50" placeholder="5">
+        </div>
+        <div class="sdpi-hint">Brightness change per dial tick (1-50, default 5)</div>
+
+        <div class="sdpi-item">
+            <label>Throttle ms</label>
+            <input id="throttleMs" type="number" min="20" max="500" placeholder="80">
+        </div>
+        <div class="sdpi-hint">Min interval between MQTT publishes (default 80ms)</div>
+    </div>
+
+    <script>
+        let websocket = null;
+        let piUUID = null;
+        let settings = {};
+
+        const FIELDS = ["mqttBroker", "mqttUser", "mqttPass", "displayName", "lightName", "stepSize", "throttleMs"];
+
+        function connectElgatoStreamDeckSocket(port, uuid, registerEvent, info, actionInfo) {
+            piUUID = uuid;
+            const actionData = JSON.parse(actionInfo);
+            settings = actionData.payload.settings || {};
+
+            websocket = new WebSocket("ws://127.0.0.1:" + port);
+
+            websocket.onopen = function () {
+                websocket.send(JSON.stringify({
+                    event: registerEvent,
+                    uuid: uuid
+                }));
+                loadSettings();
+            };
+
+            websocket.onmessage = function (evt) {
+                const data = JSON.parse(evt.data);
+                if (data.event === "didReceiveSettings") {
+                    settings = data.payload.settings || {};
+                    loadSettings();
+                }
+            };
+        }
+
+        function loadSettings() {
+            for (const field of FIELDS) {
+                const el = document.getElementById(field);
+                if (el) el.value = settings[field] || "";
+            }
+        }
+
+        function saveSettings() {
+            settings = {};
+            for (const field of FIELDS) {
+                const el = document.getElementById(field);
+                if (el && el.value) settings[field] = el.value;
+            }
+            if (websocket && websocket.readyState === WebSocket.OPEN) {
+                websocket.send(JSON.stringify({
+                    event: "setSettings",
+                    context: piUUID,
+                    payload: settings
+                }));
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            for (const field of FIELDS) {
+                const el = document.getElementById(field);
+                if (el) {
+                    el.addEventListener("input", saveSettings);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+{
+  "Actions": [
+    {
+      "Controllers": ["Encoder"],
+      "Encoder": {
+        "layout": "layouts/calendar.json",
+        "TriggerDescription": {
+          "Rotate": "Scroll events",
+          "Push": "Open meeting",
+          "Touch": "Join meeting"
+        }
+      },
+      "Icon": "imgs/action",
+      "Name": "Calendar Events",
+      "PropertyInspector": "ui/settings.html",
+      "States": [
+        {
+          "Image": "imgs/action"
+        }
+      ],
+      "UUID": "com.local.calendar-events.events"
+    }
+  ],
+  "Author": "Local",
+  "Category": "Google Calendar",
+  "CategoryIcon": "imgs/category",
+  "CodePath": "bin/plugin.js",
+  "PropertyInspectorPath": "ui/settings.html",
+  "Description": "Show today's upcoming calendar events on a dial (reads from macOS Calendar)",
+  "Icon": "imgs/plugin",
+  "Name": "Calendar Events",
+  "Nodejs": {
+    "Version": "20",
+    "Debug": "enabled"
+  },
+  "OS": [
+    {
+      "Platform": "mac",
+      "MinimumVersion": "10.15"
+    }
+  ],
+  "SDKVersion": 2,
+  "Software": {
+    "MinimumVersion": "6.4"
+  },
+  "UUID": "com.local.calendar-events",
+  "Version": "0.1.0"
+}

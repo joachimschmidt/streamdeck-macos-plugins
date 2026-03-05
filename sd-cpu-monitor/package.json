@@ -1,0 +1,17 @@
+{
+  "name": "sd-cpu-monitor",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "@elgato/streamdeck": "^1.1.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.21.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.4.0"
+  }
+}

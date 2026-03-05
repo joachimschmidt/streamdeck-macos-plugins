@@ -1,0 +1,40 @@
+{
+  "Actions": [
+    {
+      "Controllers": ["Keypad"],
+      "Icon": "imgs/action",
+      "Name": "CPU/GPU Monitor",
+      "States": [
+        {
+          "Image": "imgs/action",
+          "TitleAlignment": "bottom",
+          "FontSize": "9"
+        }
+      ],
+      "UUID": "com.local.cpu-monitor.display"
+    }
+  ],
+  "Author": "Local",
+  "Category": "System",
+  "CategoryIcon": "imgs/category",
+  "CodePath": "bin/plugin.js",
+  "Description": "Show macOS CPU and GPU usage",
+  "Icon": "imgs/plugin",
+  "Name": "CPU/GPU Monitor",
+  "Nodejs": {
+    "Version": "20",
+    "Debug": "enabled"
+  },
+  "OS": [
+    {
+      "Platform": "mac",
+      "MinimumVersion": "10.15"
+    }
+  ],
+  "SDKVersion": 2,
+  "Software": {
+    "MinimumVersion": "6.4"
+  },
+  "UUID": "com.local.cpu-monitor",
+  "Version": "0.1.0"
+}

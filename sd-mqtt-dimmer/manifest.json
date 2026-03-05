@@ -1,0 +1,48 @@
+{
+  "Actions": [
+    {
+      "Controllers": ["Encoder"],
+      "Encoder": {
+        "layout": "layouts/dimmer.json",
+        "TriggerDescription": {
+          "Rotate": "Adjust brightness",
+          "Push": "Toggle on/off",
+          "Touch": "Toggle on/off"
+        }
+      },
+      "Icon": "imgs/action",
+      "Name": "MQTT Light Dimmer",
+      "PropertyInspector": "ui/settings.html",
+      "States": [
+        {
+          "Image": "imgs/action"
+        }
+      ],
+      "UUID": "com.local.mqtt-dimmer.dimmer"
+    }
+  ],
+  "Author": "Local",
+  "Category": "MQTT Lights",
+  "CategoryIcon": "imgs/category",
+  "CodePath": "bin/plugin.js",
+  "PropertyInspectorPath": "ui/settings.html",
+  "Description": "Control Zigbee lights via MQTT with instant dial feedback",
+  "Icon": "imgs/plugin",
+  "Name": "MQTT Light Dimmer",
+  "Nodejs": {
+    "Version": "20",
+    "Debug": "enabled"
+  },
+  "OS": [
+    {
+      "Platform": "mac",
+      "MinimumVersion": "10.15"
+    }
+  ],
+  "SDKVersion": 2,
+  "Software": {
+    "MinimumVersion": "6.4"
+  },
+  "UUID": "com.local.mqtt-dimmer",
+  "Version": "0.1.0"
+}

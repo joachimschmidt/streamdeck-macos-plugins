@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>BT Connect Settings</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #2d2d2d; color: #ccc;
+      margin: 0; padding: 12px;
+      font-size: 12px;
+    }
+    .field { margin-bottom: 10px; }
+    label { display: block; margin-bottom: 3px; color: #999; font-size: 11px; }
+    input {
+      width: 100%; box-sizing: border-box;
+      padding: 6px 8px; border: 1px solid #555; border-radius: 4px;
+      background: #3a3a3a; color: #eee; font-size: 12px;
+    }
+    .hint { font-size: 10px; color: #777; margin-top: 2px; }
+    #deviceList { max-height: 200px; overflow-y: auto; }
+    .device-item {
+      padding: 6px 8px; cursor: pointer; border-radius: 4px; margin-bottom: 2px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .device-item:hover { background: #444; }
+    .device-item.selected { background: #4FC3F7; color: #1a1a2e; }
+    .device-info { display: flex; align-items: center; gap: 8px; }
+    .device-icon { font-size: 16px; flex-shrink: 0; }
+    .device-name { font-weight: 500; }
+    .device-addr { font-size: 10px; color: #888; }
+    .device-item.selected .device-addr { color: #1a1a2e88; }
+    .device-status { font-size: 10px; flex-shrink: 0; }
+    .connected { color: #81C784; }
+    .device-item.selected .connected { color: #1a1a2e; }
+  </style>
+</head>
+<body>
+
+<div class="field">
+  <label>Device</label>
+  <div id="deviceList"><em style="color:#777">Loading paired devices...</em></div>
+</div>
+
+<div class="field">
+  <label>Display Name (optional)</label>
+  <input type="text" id="displayName" placeholder="e.g. Headphones" />
+</div>
+
+<div class="field">
+  <label>Poll Interval (seconds)</label>
+  <input type="number" id="pollInterval" min="3" max="60" value="5" />
+  <div class="hint">How often to check connection status (min 3s)</div>
+</div>
+
+<div class="field">
+  <label>Device Address (auto-filled)</label>
+  <input type="text" id="deviceAddress" placeholder="XX-XX-XX-XX-XX-XX" />
+  <div class="hint">MAC address of the Bluetooth device</div>
+</div>
+
+<script>
+  let websocket = null;
+  let pluginUUID = null;
+  let settings = {};
+
+  function connectElgatoStreamDeckSocket(port, uuid, registerEvent, info, actionInfo) {
+    pluginUUID = uuid;
+    const parsed = JSON.parse(actionInfo);
+    settings = parsed.payload.settings || {};
+
+    document.getElementById("deviceAddress").value = settings.deviceAddress || "";
+    document.getElementById("displayName").value = settings.displayName || "";
+    document.getElementById("pollInterval").value = settings.pollInterval || "5";
+
+    websocket = new WebSocket("ws://127.0.0.1:" + port);
+    websocket.onopen = () => {
+      websocket.send(JSON.stringify({ event: registerEvent, uuid }));
+    };
+
+    // Fetch device list from plugin's local HTTP API
+    fetchDevices();
+
+    for (const id of ["deviceAddress", "displayName", "pollInterval"]) {
+      document.getElementById(id).addEventListener("input", save);
+    }
+  }
+
+  async function fetchDevices() {
+    try {
+      const res = await fetch("http://127.0.0.1:57821/devices");
+      const devices = await res.json();
+      renderDeviceList(devices);
+    } catch (e) {
+      // Retry once after a short delay (plugin server may not be ready)
+      setTimeout(async () => {
+        try {
+          const res = await fetch("http://127.0.0.1:57821/devices");
+          const devices = await res.json();
+          renderDeviceList(devices);
+        } catch (e2) {
+          document.getElementById("deviceList").innerHTML =
+            "<em style='color:#f77'>Could not load devices. Enter address manually below.</em>";
+        }
+      }, 2000);
+    }
+  }
+
+  const TYPE_ICONS = {
+    headphones: "\u{1F3A7}", speaker: "\u{1F50A}", keyboard: "\u2328\uFE0F",
+    mouse: "\u{1F5B1}\uFE0F", phone: "\u{1F4F1}", gamepad: "\u{1F3AE}", generic: "\u{1F517}"
+  };
+
+  function renderDeviceList(devices) {
+    const container = document.getElementById("deviceList");
+    if (!devices.length) {
+      container.innerHTML = "<em style='color:#777'>No paired devices found</em>";
+      return;
+    }
+    container.innerHTML = "";
+    for (const d of devices) {
+      const icon = TYPE_ICONS[d.type] || TYPE_ICONS.generic;
+      const item = document.createElement("div");
+      item.className = "device-item" + (d.address === settings.deviceAddress ? " selected" : "");
+      item.innerHTML = `
+        <div class="device-info">
+          <span class="device-icon">${icon}</span>
+          <div>
+            <div class="device-name">${d.name}</div>
+            <div class="device-addr">${d.address}</div>
+          </div>
+        </div>
+        ${d.connected ? '<div class="device-status connected">Connected</div>' : ""}
+      `;
+      item.addEventListener("click", () => {
+        document.getElementById("deviceAddress").value = d.address;
+        if (!document.getElementById("displayName").value) {
+          document.getElementById("displayName").value = d.name;
+        }
+        document.querySelectorAll(".device-item").forEach(el => el.classList.remove("selected"));
+        item.classList.add("selected");
+        save();
+      });
+      container.appendChild(item);
+    }
+  }
+
+  function save() {
+    settings = {
+      deviceAddress: document.getElementById("deviceAddress").value,
+      displayName: document.getElementById("displayName").value,
+      pollInterval: document.getElementById("pollInterval").value,
+    };
+    websocket?.send(JSON.stringify({
+      event: "setSettings",
+      context: pluginUUID,
+      payload: settings,
+    }));
+  }
+</script>
+</body>
+</html>
