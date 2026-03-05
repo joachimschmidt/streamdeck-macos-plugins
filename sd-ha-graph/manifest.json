@@ -1,0 +1,60 @@
+{
+  "Actions": [
+    {
+      "Controllers": ["Keypad"],
+      "Icon": "imgs/action",
+      "Name": "HA Sensor Graph (Button)",
+      "PropertyInspector": "ui/settings.html",
+      "States": [
+        {
+          "Image": "imgs/action"
+        }
+      ],
+      "UUID": "com.local.ha-graph.keypad-graph"
+    },
+    {
+      "Controllers": ["Encoder"],
+      "Encoder": {
+        "layout": "layouts/graph.json",
+        "TriggerDescription": {
+          "Rotate": "Change timeframe",
+          "Push": "Cycle timeframe",
+          "Touch": "Cycle timeframe"
+        }
+      },
+      "Icon": "imgs/action",
+      "Name": "HA Sensor Graph (Dial)",
+      "PropertyInspector": "ui/settings.html",
+      "States": [
+        {
+          "Image": "imgs/action"
+        }
+      ],
+      "UUID": "com.local.ha-graph.encoder-graph"
+    }
+  ],
+  "Author": "Local",
+  "Category": "Home Assistant",
+  "CategoryIcon": "imgs/category",
+  "CodePath": "bin/plugin.js",
+  "PropertyInspectorPath": "ui/settings.html",
+  "Description": "Display Home Assistant sensor history as line graphs",
+  "Icon": "imgs/plugin",
+  "Name": "HA Sensor Graph",
+  "Nodejs": {
+    "Version": "20",
+    "Debug": "enabled"
+  },
+  "OS": [
+    {
+      "Platform": "mac",
+      "MinimumVersion": "10.15"
+    }
+  ],
+  "SDKVersion": 2,
+  "Software": {
+    "MinimumVersion": "6.4"
+  },
+  "UUID": "com.local.ha-graph",
+  "Version": "0.1.0"
+}

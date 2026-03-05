@@ -1,6 +1,6 @@
 # Stream Deck Plugins for macOS
 
-A collection of 6 custom Stream Deck plugins built with the [Elgato Stream Deck Node.js SDK](https://github.com/elgato/streamdeck) (`@elgato/streamdeck` v1.1). All plugins target macOS and run on Node.js 20.
+A collection of 7 custom Stream Deck plugins built with the [Elgato Stream Deck Node.js SDK](https://github.com/elgato/streamdeck) (`@elgato/streamdeck` v1.1). All plugins target macOS and run on Node.js 20.
 
 ## Preview
 
@@ -12,18 +12,20 @@ A collection of 6 custom Stream Deck plugins built with the [Elgato Stream Deck 
   <img src="docs/images/preview-memory-monitor.svg" width="100" alt="Memory Monitor">
   <img src="docs/images/preview-claude-approve-pending.svg" width="100" alt="Claude Approve (pending)">
   <img src="docs/images/preview-claude-approve-idle.svg" width="100" alt="Claude Approve (idle)">
+  <img src="docs/images/preview-ha-graph-keypad.svg" width="100" alt="HA Sensor Graph (button)">
 </p>
 
-*Left to right: Bluetooth Connect, CPU Monitor, Memory Monitor, Claude Approve (pending), Claude Approve (idle)*
+*Left to right: Bluetooth Connect, CPU Monitor, Memory Monitor, Claude Approve (pending), Claude Approve (idle), HA Sensor Graph*
 
 ### Encoder Plugins (Stream Deck+ dials)
 
 <p>
   <img src="docs/images/preview-calendar-events.svg" width="200" alt="Calendar Events">
   <img src="docs/images/preview-mqtt-dimmer.svg" width="200" alt="MQTT Dimmer">
+  <img src="docs/images/preview-ha-graph-encoder.svg" width="200" alt="HA Sensor Graph (dial)">
 </p>
 
-*Left to right: Calendar Events, MQTT Dimmer*
+*Left to right: Calendar Events, MQTT Dimmer, HA Sensor Graph*
 
 ## Plugins
 
@@ -35,6 +37,7 @@ A collection of 6 custom Stream Deck plugins built with the [Elgato Stream Deck 
 | **[sd-claude-approve](#sd-claude-approve)** | Keypad | Physical approve button for [Claude Code](https://claude.ai/code) permission requests via `PermissionRequest` hook |
 | **[sd-calendar-events](#sd-calendar-events)** | Encoder | Browse today's calendar events and join meetings with a dial press |
 | **[sd-mqtt-dimmer](#sd-mqtt-dimmer)** | Encoder | Control Zigbee lights via MQTT/Zigbee2MQTT with dial rotation |
+| **[sd-ha-graph](#sd-ha-graph)** | Keypad + Encoder | Home Assistant sensor history as line graphs with color-coded values |
 
 ## Requirements
 
@@ -167,6 +170,26 @@ Controls Zigbee smart lights through a Zigbee2MQTT broker. Rotate the dial to ad
 
 ---
 
+### sd-ha-graph
+
+<img src="docs/images/preview-ha-graph-keypad.svg" width="72" alt="HA Sensor Graph (button)" align="right">
+<img src="docs/images/preview-ha-graph-encoder.svg" width="140" alt="HA Sensor Graph (dial)" align="right">
+
+Displays Home Assistant sensor history as color-coded line graphs. Supports both keypad buttons (144x144) and Stream Deck+ encoder dials. Colors map values from blue (low) through green (mid) to yellow (high), based on the full 10-day historical range for consistency across zoom levels.
+
+**Keypad:** Press to cycle through 1 minute / 1 hour / 24 hours timeframes.
+
+**Encoder:** Rotate to zoom through 27 levels (1 minute to 10 days). Press to reset to 1 hour. Data is pre-fetched and cached for instant zoom transitions.
+
+**How it works:** Connects to Home Assistant via WebSocket for real-time state updates and REST API for history. Real-time data uses a ring buffer; historical data is merged into a unified cache.
+
+**Additional dependencies:**
+- A running [Home Assistant](https://www.home-assistant.io/) instance with a long-lived access token.
+
+**Settings:** HA URL, access token (shared across all HA Graph actions via global settings), entity ID, display name, unit, reverse colors, freeze scale (locks Y-axis to 10-day range).
+
+---
+
 ## Compatibility Notes
 
 These plugins were developed on an Apple Silicon Mac and have several compatibility limitations:
@@ -185,12 +208,14 @@ All plugins use macOS-specific tools (`system_profiler`, `ioreg`, `vm_stat`, `to
 | sd-claude-approve | Yes | Yes | Pure Node.js, no architecture dependency. |
 | sd-calendar-events | Yes | Yes | Swift helper built as universal binary (ARM64 + x86_64). |
 | sd-mqtt-dimmer | Yes | Yes | Pure Node.js, no architecture dependency. |
+| sd-ha-graph | Yes | Yes | Pure Node.js, no architecture dependency. |
 
 ### Known Limitations
 
 - **sd-calendar-events** opens meeting links exclusively in Google Chrome. Other browsers are not supported.
 - **sd-bt-connect** requires `blueutil` to be installed via Homebrew.
 - **sd-mqtt-dimmer** stores MQTT credentials as plaintext in Stream Deck settings.
+- **sd-ha-graph** stores the HA access token as plaintext in Stream Deck settings. History range is limited to what the HA recorder retains (default ~10 days).
 
 ## Architecture
 

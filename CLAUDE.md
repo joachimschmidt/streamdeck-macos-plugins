@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-Monorepo of 6 Stream Deck plugins for macOS, built with the Elgato Stream Deck Node.js SDK (`@elgato/streamdeck` v1.1). Each plugin is a self-contained directory with its own `package.json`, build script, and install script. All plugins target macOS only and run on Node.js 20.
+Monorepo of 7 Stream Deck plugins for macOS, built with the Elgato Stream Deck Node.js SDK (`@elgato/streamdeck` v1.1). Each plugin is a self-contained directory with its own `package.json`, build script, and install script. All plugins target macOS only and run on Node.js 20.
 
 ## Plugins
 
@@ -16,6 +16,7 @@ Monorepo of 6 Stream Deck plugins for macOS, built with the Elgato Stream Deck N
 | `sd-claude-approve` | Keypad | Physical approve button for Claude Code tool calls (file-based IPC) |
 | `sd-calendar-events` | Encoder (dial) | Today's calendar events with meeting join (uses Swift EventKit helper) |
 | `sd-mqtt-dimmer` | Encoder (dial) | Zigbee light dimmer via MQTT/Zigbee2MQTT |
+| `sd-ha-graph` | Keypad + Encoder | Home Assistant sensor history graphs via WebSocket + REST API |
 
 ## Build & Install
 

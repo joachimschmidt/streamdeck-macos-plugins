@@ -107,6 +107,60 @@ const calendarSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height=
   <text x="60" y="82" font-family="-apple-system,Helvetica" font-size="10" fill="#4FC3F7">Press to join</text>
 </svg>`;
 
+// --- sd-ha-graph keypad preview (144x144 sensor graph button) ---
+const haGraphKeypadSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+  <rect width="144" height="144" rx="28" fill="#1a1a2e"/>
+  <text x="10" y="16" font-family="-apple-system,Helvetica" font-size="11" font-weight="600" fill="#aaa">Desk Power</text>
+  <text x="136" y="16" font-family="-apple-system,Helvetica" font-size="12" font-weight="700" fill="rgb(255,193,7)" text-anchor="end">47.2 W</text>
+  <defs>
+    <linearGradient id="sg1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="15%" stop-color="rgb(255,193,7)"/>
+      <stop offset="50%" stop-color="rgb(76,175,80)"/>
+      <stop offset="85%" stop-color="rgb(79,195,247)"/>
+    </linearGradient>
+    <linearGradient id="fg1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="15%" stop-color="rgb(255,193,7)" stop-opacity="0.3"/>
+      <stop offset="50%" stop-color="rgb(76,175,80)" stop-opacity="0.15"/>
+      <stop offset="85%" stop-color="rgb(79,195,247)" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <line x1="6" y1="48" x2="138" y2="48" stroke="#333" stroke-width="0.5" stroke-dasharray="3,3"/>
+  <line x1="6" y1="72" x2="138" y2="72" stroke="#333" stroke-width="0.5" stroke-dasharray="3,3"/>
+  <line x1="6" y1="96" x2="138" y2="96" stroke="#333" stroke-width="0.5" stroke-dasharray="3,3"/>
+  <polygon points="6,118 6,85 16,90 26,82 36,88 46,72 56,65 66,70 76,55 86,48 96,42 106,50 116,38 126,35 132,40 138,32 138,118" fill="url(#fg1)"/>
+  <polyline points="6,85 16,90 26,82 36,88 46,72 56,65 66,70 76,55 86,48 96,42 106,50 116,38 126,35 132,40 138,32" fill="none" stroke="url(#sg1)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <text x="8" y="38" font-family="-apple-system,Helvetica" font-size="9" font-weight="500" fill="rgb(255,193,7)" opacity="0.7">52.0 W</text>
+  <text x="8" y="112" font-family="-apple-system,Helvetica" font-size="9" font-weight="500" fill="rgb(79,195,247)" opacity="0.7">8.3 W</text>
+  <text x="72" y="134" font-family="-apple-system,Helvetica" font-size="9" fill="#666" text-anchor="middle">Last 1 hour</text>
+</svg>`;
+
+// --- sd-ha-graph encoder preview (200x100 with label+value header) ---
+const haGraphEncoderSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="100" viewBox="0 0 200 100">
+  <rect width="200" height="100" rx="12" fill="#1a1a2e"/>
+  <text x="8" y="16" font-family="-apple-system,Helvetica" font-size="12" font-weight="600" fill="#ccc">Temperature</text>
+  <text x="192" y="16" font-family="-apple-system,Helvetica" font-size="13" font-weight="700" fill="rgb(76,175,80)" text-anchor="end">21.3 °C</text>
+  <defs>
+    <linearGradient id="sg2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="20%" stop-color="rgb(255,193,7)"/>
+      <stop offset="50%" stop-color="rgb(76,175,80)"/>
+      <stop offset="80%" stop-color="rgb(79,195,247)"/>
+    </linearGradient>
+    <linearGradient id="fg2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="20%" stop-color="rgb(255,193,7)" stop-opacity="0.3"/>
+      <stop offset="50%" stop-color="rgb(76,175,80)" stop-opacity="0.15"/>
+      <stop offset="80%" stop-color="rgb(79,195,247)" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <line x1="6" y1="40" x2="194" y2="40" stroke="#333" stroke-width="0.5" stroke-dasharray="3,3"/>
+  <line x1="6" y1="58" x2="194" y2="58" stroke="#333" stroke-width="0.5" stroke-dasharray="3,3"/>
+  <line x1="6" y1="76" x2="194" y2="76" stroke="#333" stroke-width="0.5" stroke-dasharray="3,3"/>
+  <polygon points="6,90 6,68 18,65 30,70 42,62 54,58 66,55 78,52 90,48 102,45 114,50 126,55 138,48 150,42 162,38 174,35 186,40 194,36 194,90" fill="url(#fg2)"/>
+  <polyline points="6,68 18,65 30,70 42,62 54,58 66,55 78,52 90,48 102,45 114,50 126,55 138,48 150,42 162,38 174,35 186,40 194,36" fill="none" stroke="url(#sg2)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <text x="8" y="32" font-family="-apple-system,Helvetica" font-size="9" font-weight="500" fill="rgb(255,193,7)" opacity="0.7">24.5 °C</text>
+  <text x="8" y="86" font-family="-apple-system,Helvetica" font-size="9" font-weight="500" fill="rgb(79,195,247)" opacity="0.7">18.2 °C</text>
+  <text x="192" y="89" font-family="-apple-system,Helvetica" font-size="9" font-weight="600" fill="#555" text-anchor="end">1d</text>
+</svg>`;
+
 // Write all SVGs
 const previews = {
   "cpu-monitor": cpuSvg,
@@ -116,6 +170,8 @@ const previews = {
   "claude-approve-idle": claudeIdleSvg,
   "mqtt-dimmer": dimmerSvg,
   "calendar-events": calendarSvg,
+  "ha-graph-keypad": haGraphKeypadSvg,
+  "ha-graph-encoder": haGraphEncoderSvg,
 };
 
 for (const [name, svg] of Object.entries(previews)) {
