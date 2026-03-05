@@ -2,23 +2,39 @@
 
 A collection of 6 custom Stream Deck plugins built with the [Elgato Stream Deck Node.js SDK](https://github.com/elgato/streamdeck) (`@elgato/streamdeck` v1.1). All plugins target macOS and run on Node.js 20.
 
-## Plugins
+## Preview
 
 ### Keypad Plugins (buttons)
 
-| Plugin | Description |
-|--------|-------------|
-| **[sd-bt-connect](#sd-bt-connect)** | Connect/disconnect Bluetooth devices with battery level and device type icons |
-| **[sd-cpu-monitor](#sd-cpu-monitor)** | Real-time CPU and GPU usage display |
-| **[sd-memory-monitor](#sd-memory-monitor)** | RAM, swap, and memory pressure display |
-| **[sd-claude-approve](#sd-claude-approve)** | Physical approve/deny button for [Claude Code](https://claude.ai/code) tool calls via file-based IPC |
+<p>
+  <img src="docs/images/preview-bt-connect.svg" width="100" alt="Bluetooth Connect">
+  <img src="docs/images/preview-cpu-monitor.svg" width="100" alt="CPU Monitor">
+  <img src="docs/images/preview-memory-monitor.svg" width="100" alt="Memory Monitor">
+  <img src="docs/images/preview-claude-approve-pending.svg" width="100" alt="Claude Approve (pending)">
+  <img src="docs/images/preview-claude-approve-idle.svg" width="100" alt="Claude Approve (idle)">
+</p>
+
+*Left to right: Bluetooth Connect, CPU Monitor, Memory Monitor, Claude Approve (pending), Claude Approve (idle)*
 
 ### Encoder Plugins (Stream Deck+ dials)
 
-| Plugin | Description |
-|--------|-------------|
-| **[sd-calendar-events](#sd-calendar-events)** | Browse today's calendar events and join meetings with a dial press |
-| **[sd-mqtt-dimmer](#sd-mqtt-dimmer)** | Control Zigbee lights via MQTT/Zigbee2MQTT with dial rotation |
+<p>
+  <img src="docs/images/preview-calendar-events.svg" width="200" alt="Calendar Events">
+  <img src="docs/images/preview-mqtt-dimmer.svg" width="200" alt="MQTT Dimmer">
+</p>
+
+*Left to right: Calendar Events, MQTT Dimmer*
+
+## Plugins
+
+| Plugin | Controller | Description |
+|--------|-----------|-------------|
+| **[sd-bt-connect](#sd-bt-connect)** | Keypad | Connect/disconnect Bluetooth devices with battery level and device type icons |
+| **[sd-cpu-monitor](#sd-cpu-monitor)** | Keypad | Real-time CPU and GPU usage display |
+| **[sd-memory-monitor](#sd-memory-monitor)** | Keypad | RAM, swap, and memory pressure display |
+| **[sd-claude-approve](#sd-claude-approve)** | Keypad | Physical approve/deny button for [Claude Code](https://claude.ai/code) tool calls via file-based IPC |
+| **[sd-calendar-events](#sd-calendar-events)** | Encoder | Browse today's calendar events and join meetings with a dial press |
+| **[sd-mqtt-dimmer](#sd-mqtt-dimmer)** | Encoder | Control Zigbee lights via MQTT/Zigbee2MQTT with dial rotation |
 
 ## Requirements
 
@@ -50,6 +66,8 @@ The `install.sh` script copies the built `.sdPlugin` directory to:
 
 ### sd-bt-connect
 
+<img src="docs/images/preview-bt-connect.svg" width="72" alt="Bluetooth Connect" align="right">
+
 Displays Bluetooth device connection status with battery level and device type icons (headphones, keyboard, mouse, etc.). Press the key to toggle connect/disconnect.
 
 **How it works:** Uses `system_profiler SPBluetoothDataType` for device discovery, a custom Swift helper (`bt-info`) with the IOBluetooth framework for battery levels, and [`blueutil`](https://github.com/toy/blueutil) for connect/disconnect.
@@ -63,6 +81,8 @@ Displays Bluetooth device connection status with battery level and device type i
 
 ### sd-cpu-monitor
 
+<img src="docs/images/preview-cpu-monitor.svg" width="72" alt="CPU Monitor" align="right">
+
 Renders a real-time bar chart of CPU usage (user/system/idle) and GPU utilization percentage.
 
 **How it works:** Parses output from `top -l1` for CPU stats and `ioreg -r -c IOAccelerator` for GPU utilization. All tools are built into macOS.
@@ -72,6 +92,8 @@ Renders a real-time bar chart of CPU usage (user/system/idle) and GPU utilizatio
 ---
 
 ### sd-memory-monitor
+
+<img src="docs/images/preview-memory-monitor.svg" width="72" alt="Memory Monitor" align="right">
 
 Shows used/total RAM, swap usage, and system memory pressure with color-coded status (green/yellow/red).
 
@@ -83,6 +105,8 @@ Shows used/total RAM, swap usage, and system memory pressure with color-coded st
 
 ### sd-claude-approve
 
+<img src="docs/images/preview-claude-approve-pending.svg" width="72" alt="Claude Approve" align="right">
+
 A physical button to approve or deny Claude Code tool calls. When Claude Code requests permission, the button lights up with details of the pending action. Press to approve, long-press to deny.
 
 **How it works:** Polls `/tmp/claude-sd-pending.json` for pending requests and writes responses to `/tmp/claude-sd-response`. Requires a companion script/hook on the Claude Code side to write/read these files.
@@ -92,6 +116,8 @@ A physical button to approve or deny Claude Code tool calls. When Claude Code re
 ---
 
 ### sd-calendar-events
+
+<img src="docs/images/preview-calendar-events.svg" width="140" alt="Calendar Events" align="right">
 
 Displays today's calendar events on the Stream Deck+ dial. Rotate to browse events, press to join the associated meeting (Zoom, Teams, Google Meet, Webex). Touch to refresh.
 
@@ -107,6 +133,8 @@ Displays today's calendar events on the Stream Deck+ dial. Rotate to browse even
 ---
 
 ### sd-mqtt-dimmer
+
+<img src="docs/images/preview-mqtt-dimmer.svg" width="140" alt="MQTT Dimmer" align="right">
 
 Controls Zigbee smart lights through a Zigbee2MQTT broker. Rotate the dial to adjust brightness, press to toggle on/off, touch to sync state.
 

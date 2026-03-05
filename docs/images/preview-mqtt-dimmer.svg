@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="100" viewBox="0 0 200 100">
+  <rect width="200" height="100" rx="12" fill="#1a1a2e"/>
+  <!-- Bulb icon area -->
+  <circle cx="30" cy="35" r="16" fill="#FFC107" opacity=".15"/>
+  <path d="M30 20c-5 0-9 4-9 9 0 3 1.5 5.8 3.8 7.4.7.5 1 1.2 1 2v2a1.4 1.4 0 001.4 1.4h5.6a1.4 1.4 0 001.4-1.4v-2c0-.8.4-1.5 1-2C37.5 34.8 39 32 39 29c0-5-4-9-9-9z" fill="#FFC107"/>
+  <rect x="26" y="43" width="8" height="1.5" rx=".75" fill="#FFA000"/>
+  <!-- Label + value -->
+  <text x="60" y="30" font-family="-apple-system,Helvetica" font-size="13" font-weight="600" fill="#ccc">Living Room</text>
+  <text x="60" y="50" font-family="-apple-system,Helvetica" font-size="16" font-weight="700" fill="#FFC107">70%</text>
+  <!-- Progress bar -->
+  <rect x="16" y="72" width="168" height="10" rx="5" fill="#333"/>
+  <defs><clipPath id="db"><rect x="16" y="72" width="168" height="10" rx="5"/></clipPath></defs>
+  <rect x="16" y="72" width="118" height="10" fill="#FFC107" clip-path="url(#db)"/>
+</svg>
