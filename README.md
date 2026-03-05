@@ -32,7 +32,7 @@ A collection of 6 custom Stream Deck plugins built with the [Elgato Stream Deck 
 | **[sd-bt-connect](#sd-bt-connect)** | Keypad | Connect/disconnect Bluetooth devices with battery level and device type icons |
 | **[sd-cpu-monitor](#sd-cpu-monitor)** | Keypad | Real-time CPU and GPU usage display |
 | **[sd-memory-monitor](#sd-memory-monitor)** | Keypad | RAM, swap, and memory pressure display |
-| **[sd-claude-approve](#sd-claude-approve)** | Keypad | Physical approve/deny button for [Claude Code](https://claude.ai/code) tool calls via file-based IPC |
+| **[sd-claude-approve](#sd-claude-approve)** | Keypad | Physical approve button for [Claude Code](https://claude.ai/code) permission requests via `PermissionRequest` hook |
 | **[sd-calendar-events](#sd-calendar-events)** | Encoder | Browse today's calendar events and join meetings with a dial press |
 | **[sd-mqtt-dimmer](#sd-mqtt-dimmer)** | Encoder | Control Zigbee lights via MQTT/Zigbee2MQTT with dial rotation |
 
@@ -107,9 +107,29 @@ Shows used/total RAM, swap usage, and system memory pressure with color-coded st
 
 <img src="docs/images/preview-claude-approve-pending.svg" width="72" alt="Claude Approve" align="right">
 
-A physical button to approve or deny Claude Code tool calls. When Claude Code requests permission, the button lights up with details of the pending action. Press to approve, long-press to deny.
+A physical button to approve Claude Code permission requests. When Claude Code needs permission to run a tool, the button lights up showing the tool name and details. Press to approve; if no response within 60 seconds, the request is denied.
 
-**How it works:** Polls `/tmp/claude-sd-pending.json` for pending requests and writes responses to `/tmp/claude-sd-response`. Requires a companion script/hook on the Claude Code side to write/read these files.
+**How it works:** Uses Claude Code's `PermissionRequest` hook, which fires **only** when a real permission dialog would be shown (not for auto-approved tools). The hook writes the pending request to `/tmp/claude-sd-pending.json` and blocks until the Stream Deck plugin writes a response to `/tmp/claude-sd-response`. The hook then returns `allow` or `deny` to Claude Code.
+
+**Hook setup:** Run `bash install.sh` — it automatically configures the hook in `~/.claude/settings.json`. To set up manually, add this to `~/.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "PermissionRequest": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/path/to/streamdeck-plugins/sd-claude-approve/hooks/claude-approve.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
 
 **Additional dependencies:** None.
 

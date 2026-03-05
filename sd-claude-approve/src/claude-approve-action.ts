@@ -5,7 +5,7 @@ import {
   type WillDisappearEvent,
   type KeyDownEvent,
 } from "@elgato/streamdeck";
-import { readFileSync, writeFileSync, existsSync, unlinkSync, watch, type FSWatcher } from "fs";
+import { readFileSync, writeFileSync, existsSync, unlinkSync } from "fs";
 
 const PENDING_FILE = "/tmp/claude-sd-pending.json";
 const RESPONSE_FILE = "/tmp/claude-sd-response";
@@ -79,26 +79,16 @@ function renderIdle(): string {
 function renderPending(tool: PendingTool): string {
   const summary = toolSummary(tool);
   const age = Math.round((Date.now() / 1000 - tool.timestamp));
-  const timeLeft = Math.max(0, 30 - age);
+  const timeLeft = Math.max(0, 60 - age);
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <rect width="${W}" height="${H}" rx="28" fill="#1a1a2e"/>
-
-  <!-- Pulsing border -->
   <rect x="4" y="4" width="136" height="136" rx="24" fill="none" stroke="#FFA726" stroke-width="3" opacity=".7"/>
-
-  <!-- Tool name -->
   <text x="72" y="28" font-family="-apple-system,Helvetica" font-size="13" font-weight="700" fill="#FFA726" text-anchor="middle">${escapeXml(summary.line1)}</text>
-
-  <!-- Details -->
   <text x="72" y="50" font-family="Menlo,monospace" font-size="10" fill="#ccc" text-anchor="middle">${escapeXml(summary.line2)}</text>
   ${summary.line3 ? `<text x="72" y="66" font-family="Menlo,monospace" font-size="9" fill="#888" text-anchor="middle">${escapeXml(summary.line3)}</text>` : ""}
-
-  <!-- Approve button -->
   <rect x="22" y="80" width="100" height="30" rx="8" fill="#4CAF50"/>
   <text x="72" y="100" font-family="-apple-system,Helvetica" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">APPROVE</text>
-
-  <!-- Timer -->
   <text x="72" y="130" font-family="-apple-system,Helvetica" font-size="10" fill="#666" text-anchor="middle">${timeLeft}s remaining</text>
 </svg>`;
 }
@@ -120,7 +110,6 @@ function svgDataUri(svg: string): string {
 
 interface InstanceState {
   pollTimer: ReturnType<typeof setInterval> | null;
-  watcher: FSWatcher | null;
   pending: PendingTool | null;
 }
 
@@ -131,20 +120,17 @@ export class ClaudeApproveAction extends SingletonAction {
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     const state: InstanceState = {
       pollTimer: null,
-      watcher: null,
       pending: null,
     };
     this.instances.set(ev.action.id, state);
 
-    // Poll for pending file changes
     state.pollTimer = setInterval(() => this.checkPending(ev.action, state), 500);
-    await this.checkPending(ev.action, state);
+    await this.showIdle(ev.action);
   }
 
   override async onWillDisappear(ev: WillDisappearEvent): Promise<void> {
     const state = this.instances.get(ev.action.id);
     if (state?.pollTimer) clearInterval(state.pollTimer);
-    if (state?.watcher) state.watcher.close();
     this.instances.delete(ev.action.id);
   }
 
@@ -152,12 +138,11 @@ export class ClaudeApproveAction extends SingletonAction {
     const state = this.instances.get(ev.action.id);
     if (!state?.pending) return;
 
-    // Write approval
+    // Write approval for the hook to pick up
     try {
       writeFileSync(RESPONSE_FILE, "approve");
       state.pending = null;
 
-      // Show approved briefly
       await ev.action.setImage(svgDataUri(renderApproved()));
       await ev.action.setTitle("");
       setTimeout(() => this.showIdle(ev.action), 1500);
@@ -172,8 +157,8 @@ export class ClaudeApproveAction extends SingletonAction {
         const data = readFileSync(PENDING_FILE, "utf-8");
         const tool: PendingTool = JSON.parse(data);
 
-        // Check if it's stale (older than 35s)
-        if (Date.now() / 1000 - tool.timestamp > 35) {
+        // Stale (older than 65s — hook times out at 60s)
+        if (Date.now() / 1000 - tool.timestamp > 65) {
           state.pending = null;
           await this.showIdle(action);
           return;
@@ -183,10 +168,7 @@ export class ClaudeApproveAction extends SingletonAction {
         await action.setImage(svgDataUri(renderPending(tool)));
         await action.setTitle("");
       } else if (state.pending) {
-        // File was removed (hook timed out or was handled)
         state.pending = null;
-        await this.showIdle(action);
-      } else {
         await this.showIdle(action);
       }
     } catch {
