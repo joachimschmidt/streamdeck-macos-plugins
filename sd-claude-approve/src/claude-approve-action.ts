@@ -5,15 +5,16 @@ import {
   type WillDisappearEvent,
   type KeyDownEvent,
 } from "@elgato/streamdeck";
-import { readFileSync, writeFileSync, existsSync, unlinkSync } from "fs";
+import { readFileSync, writeFileSync, readdirSync, unlinkSync } from "fs";
 
-const PENDING_FILE = "/tmp/claude-sd-pending.json";
-const RESPONSE_FILE = "/tmp/claude-sd-response";
+const PENDING_DIR = "/tmp/claude-sd";
 
 interface PendingTool {
   tool_name: string;
   tool_input: Record<string, any>;
   timestamp: number;
+  session_id: string;
+  request_id: string;
 }
 
 // --- SVG rendering ---
@@ -76,10 +77,11 @@ function renderIdle(): string {
 </svg>`;
 }
 
-function renderPending(tool: PendingTool): string {
+function renderPending(tool: PendingTool, queueSize: number): string {
   const summary = toolSummary(tool);
   const age = Math.round((Date.now() / 1000 - tool.timestamp));
   const timeLeft = Math.max(0, 60 - age);
+  const queueLabel = queueSize > 1 ? `1/${queueSize}` : "";
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <rect width="${W}" height="${H}" rx="28" fill="#1a1a2e"/>
@@ -89,7 +91,8 @@ function renderPending(tool: PendingTool): string {
   ${summary.line3 ? `<text x="72" y="66" font-family="Menlo,monospace" font-size="9" fill="#888" text-anchor="middle">${escapeXml(summary.line3)}</text>` : ""}
   <rect x="22" y="80" width="100" height="30" rx="8" fill="#4CAF50"/>
   <text x="72" y="100" font-family="-apple-system,Helvetica" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">APPROVE</text>
-  <text x="72" y="130" font-family="-apple-system,Helvetica" font-size="10" fill="#666" text-anchor="middle">${timeLeft}s remaining</text>
+  <text x="${queueLabel ? 28 : 72}" y="130" font-family="-apple-system,Helvetica" font-size="10" fill="#666" text-anchor="middle">${timeLeft}s</text>
+  ${queueLabel ? `<text x="110" y="130" font-family="-apple-system,Helvetica" font-size="10" font-weight="600" fill="#FFA726" text-anchor="middle">${queueLabel}</text>` : ""}
 </svg>`;
 }
 
@@ -106,11 +109,39 @@ function svgDataUri(svg: string): string {
   return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
 }
 
+// --- Helpers ---
+
+function getPendingQueue(): PendingTool[] {
+  try {
+    const files = readdirSync(PENDING_DIR).filter(f => f.startsWith("pending-") && f.endsWith(".json"));
+    const tools: PendingTool[] = [];
+    for (const file of files) {
+      try {
+        const data = readFileSync(`${PENDING_DIR}/${file}`, "utf-8");
+        const tool: PendingTool = JSON.parse(data);
+        // Skip stale entries (older than 65s — hook times out at 60s)
+        if (Date.now() / 1000 - tool.timestamp <= 65) {
+          tools.push(tool);
+        } else {
+          try { unlinkSync(`${PENDING_DIR}/${file}`); } catch {}
+        }
+      } catch {
+        // Skip unreadable files
+      }
+    }
+    // Sort by timestamp — oldest first
+    tools.sort((a, b) => a.timestamp - b.timestamp);
+    return tools;
+  } catch {
+    return [];
+  }
+}
+
 // --- Action ---
 
 interface InstanceState {
   pollTimer: ReturnType<typeof setInterval> | null;
-  pending: PendingTool | null;
+  currentRequestId: string | null;
 }
 
 @action({ UUID: "com.local.claude-approve.button" })
@@ -120,7 +151,7 @@ export class ClaudeApproveAction extends SingletonAction {
   override async onWillAppear(ev: WillAppearEvent): Promise<void> {
     const state: InstanceState = {
       pollTimer: null,
-      pending: null,
+      currentRequestId: null,
     };
     this.instances.set(ev.action.id, state);
 
@@ -136,16 +167,17 @@ export class ClaudeApproveAction extends SingletonAction {
 
   override async onKeyDown(ev: KeyDownEvent): Promise<void> {
     const state = this.instances.get(ev.action.id);
-    if (!state?.pending) return;
+    if (!state?.currentRequestId) return;
 
-    // Write approval for the hook to pick up
     try {
-      writeFileSync(RESPONSE_FILE, "approve");
-      state.pending = null;
+      writeFileSync(`${PENDING_DIR}/response-${state.currentRequestId}`, "approve");
+      state.currentRequestId = null;
 
       await ev.action.setImage(svgDataUri(renderApproved()));
       await ev.action.setTitle("");
-      setTimeout(() => this.showIdle(ev.action), 1500);
+
+      // Check for more in queue after brief flash
+      setTimeout(() => this.checkPending(ev.action, state), 800);
     } catch (err: any) {
       console.error("Failed to write approval:", err.message);
     }
@@ -153,26 +185,19 @@ export class ClaudeApproveAction extends SingletonAction {
 
   private async checkPending(action: any, state: InstanceState): Promise<void> {
     try {
-      if (existsSync(PENDING_FILE)) {
-        const data = readFileSync(PENDING_FILE, "utf-8");
-        const tool: PendingTool = JSON.parse(data);
+      const queue = getPendingQueue();
 
-        // Stale (older than 65s — hook times out at 60s)
-        if (Date.now() / 1000 - tool.timestamp > 65) {
-          state.pending = null;
-          await this.showIdle(action);
-          return;
-        }
-
-        state.pending = tool;
-        await action.setImage(svgDataUri(renderPending(tool)));
+      if (queue.length > 0) {
+        const next = queue[0];
+        state.currentRequestId = next.request_id;
+        await action.setImage(svgDataUri(renderPending(next, queue.length)));
         await action.setTitle("");
-      } else if (state.pending) {
-        state.pending = null;
+      } else if (state.currentRequestId) {
+        state.currentRequestId = null;
         await this.showIdle(action);
       }
     } catch {
-      // File might be mid-write, skip this tick
+      // Skip errors
     }
   }
 
