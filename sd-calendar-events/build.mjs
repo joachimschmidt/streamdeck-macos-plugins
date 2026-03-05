@@ -36,10 +36,20 @@ writeFileSync(`${HELPER_APP}/Contents/Info.plist`, `<?xml version="1.0" encoding
 </dict>
 </plist>`);
 
+// Compile as universal binary (ARM64 + x86_64) for cross-architecture compatibility
 execSync(
-  `swiftc -O -framework EventKit -framework Foundation src/swift/CalendarHelper.swift -o "${HELPER_APP}/Contents/MacOS/CalendarHelper"`,
+  `swiftc -O -framework EventKit -framework Foundation -target arm64-apple-macosx10.15 src/swift/CalendarHelper.swift -o "${HELPER_APP}/Contents/MacOS/CalendarHelper-arm64"`,
   { stdio: "inherit" }
 );
+execSync(
+  `swiftc -O -framework EventKit -framework Foundation -target x86_64-apple-macosx10.15 src/swift/CalendarHelper.swift -o "${HELPER_APP}/Contents/MacOS/CalendarHelper-x86"`,
+  { stdio: "inherit" }
+);
+execSync(
+  `lipo -create "${HELPER_APP}/Contents/MacOS/CalendarHelper-arm64" "${HELPER_APP}/Contents/MacOS/CalendarHelper-x86" -output "${HELPER_APP}/Contents/MacOS/CalendarHelper"`,
+  { stdio: "inherit" }
+);
+execSync(`rm "${HELPER_APP}/Contents/MacOS/CalendarHelper-arm64" "${HELPER_APP}/Contents/MacOS/CalendarHelper-x86"`);
 
 // Bundle plugin
 await build({

@@ -79,7 +79,23 @@ function getDeviceType(address: string): DeviceType {
 
 // Resolve path to bt-info binary bundled in plugin
 const BT_INFO = join(dirname(dirname(__filename)), "bin", "bt-info");
-const BLUEUTIL = "/opt/homebrew/bin/blueutil";
+// Resolve blueutil path dynamically to support both Apple Silicon (/opt/homebrew) and Intel (/usr/local)
+let resolvedBlueutil: string | null = null;
+async function getBlueutil(): Promise<string> {
+  if (resolvedBlueutil) return resolvedBlueutil;
+  try {
+    const { stdout } = await exec("/usr/bin/which", ["blueutil"]);
+    resolvedBlueutil = stdout.trim();
+  } catch {
+    // Fallback to common Homebrew paths
+    const { existsSync } = await import("fs");
+    for (const p of ["/opt/homebrew/bin/blueutil", "/usr/local/bin/blueutil"]) {
+      if (existsSync(p)) { resolvedBlueutil = p; break; }
+    }
+  }
+  if (!resolvedBlueutil) throw new Error("blueutil not found — install with: brew install blueutil");
+  return resolvedBlueutil;
+}
 
 interface BtInfoDevice {
   name: string;
@@ -108,7 +124,8 @@ async function isConnected(address: string): Promise<{ connected: boolean; batte
 }
 
 async function toggleConnection(address: string, connect: boolean): Promise<void> {
-  await exec(BLUEUTIL, [connect ? "--connect" : "--disconnect", address], {
+  const blueutil = await getBlueutil();
+  await exec(blueutil, [connect ? "--connect" : "--disconnect", address], {
     timeout: 15000,
   });
 }

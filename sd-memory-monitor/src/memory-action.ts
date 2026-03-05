@@ -20,19 +20,20 @@ interface MemoryInfo {
 }
 
 async function getMemoryInfo(): Promise<MemoryInfo> {
-  const [vmStatResult, memsizeResult, swapResult, pressureResult] = await Promise.all([
+  const [vmStatResult, memsizeResult, swapResult, pressureResult, pageSizeResult] = await Promise.all([
     exec("vm_stat"),
     exec("sysctl", ["-n", "hw.memsize"]),
     exec("sysctl", ["vm.swapusage"]),
     exec("memory_pressure", ["-Q"]),
+    exec("sysctl", ["-n", "hw.pagesize"]),
   ]);
 
   // Parse total RAM
   const totalBytes = parseInt(memsizeResult.stdout.trim());
   const totalGB = totalBytes / (1024 ** 3);
 
-  // Parse vm_stat
-  const pageSize = 16384;
+  // Parse vm_stat — page size varies by architecture (16KB on ARM64, 4KB on x86_64)
+  const pageSize = parseInt(pageSizeResult.stdout.trim()) || 16384;
   const pages = (key: string): number => {
     const match = vmStatResult.stdout.match(new RegExp(`${key}:\\s+(\\d+)`));
     return match ? parseInt(match[1]) : 0;
