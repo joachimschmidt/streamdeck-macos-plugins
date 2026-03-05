@@ -12,10 +12,11 @@ A collection of 8 custom Stream Deck plugins built with the [Elgato Stream Deck 
   <img src="docs/images/preview-memory-monitor.svg" width="100" alt="Memory Monitor">
   <img src="docs/images/preview-claude-approve-pending.svg" width="100" alt="Claude Approve (pending)">
   <img src="docs/images/preview-claude-approve-idle.svg" width="100" alt="Claude Approve (idle)">
+  <img src="docs/images/preview-calendar-lcd.svg" width="100" alt="Calendar LCD">
   <img src="docs/images/preview-ha-graph-keypad.svg" width="100" alt="HA Sensor Graph (button)">
 </p>
 
-*Left to right: Bluetooth Connect, CPU Monitor, Memory Monitor, Claude Approve (pending), Claude Approve (idle), HA Sensor Graph*
+*Left to right: Bluetooth Connect, CPU Monitor, Memory Monitor, Claude Approve (pending), Claude Approve (idle), Calendar LCD, HA Sensor Graph*
 
 ### Encoder Plugins (Stream Deck+ dials)
 
@@ -157,6 +158,8 @@ Displays today's calendar events on the Stream Deck+ dial. Rotate to browse even
 ---
 
 ### sd-calendar-lcd
+
+<img src="docs/images/preview-calendar-lcd.svg" width="72" alt="Calendar LCD" align="right">
 
 Displays today's calendar events on a standard Stream Deck LCD key. Short press to cycle through events, long press to join the associated meeting. When no events remain, tapping opens the Calendar app.
 
