@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Calendar Events Settings</title>
+  <title>Calendar LCD Settings</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -77,6 +77,58 @@
       font-size: 10px;
       color: #777;
     }
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 4px;
+      border-bottom: 1px solid #3a3a3a;
+    }
+    .toggle-label {
+      font-size: 12px;
+      color: #d8d8d8;
+    }
+    .toggle-hint {
+      font-size: 10px;
+      color: #777;
+      padding: 2px 4px 6px 4px;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #555;
+      border-radius: 10px;
+      transition: background 0.2s;
+    }
+    .toggle-slider:before {
+      content: "";
+      position: absolute;
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+    .toggle-switch input:checked + .toggle-slider {
+      background: #0078d4;
+    }
+    .toggle-switch input:checked + .toggle-slider:before {
+      transform: translateX(16px);
+    }
     #statusBar {
       margin-top: 6px;
       padding: 6px;
@@ -102,14 +154,14 @@
       <button id="refreshEventsBtn">Refresh Events Now</button>
 
       <div class="sdpi-heading" style="margin-top:10px">Options</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 4px;border-bottom:1px solid #3a3a3a">
-        <span style="font-size:12px;color:#d8d8d8">Force Google Chrome</span>
-        <label style="position:relative;width:36px;height:20px;flex-shrink:0">
-          <input type="checkbox" id="forceChromeToggle" style="opacity:0;width:0;height:0" />
-          <span id="chromeSlider" style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#555;border-radius:10px;transition:background 0.2s"></span>
+      <div class="toggle-row">
+        <span class="toggle-label">Force Google Chrome</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="forceChromeToggle" />
+          <span class="toggle-slider"></span>
         </label>
       </div>
-      <div style="font-size:10px;color:#777;padding:2px 4px 6px 4px">When enabled, meeting links always open in Chrome. When disabled, uses your default browser.</div>
+      <div class="toggle-hint">When enabled, meeting links always open in Chrome. When disabled, uses your default browser.</div>
     </div>
 
     <div id="statusBar">Reads from macOS Calendar</div>
@@ -128,17 +180,7 @@
 
     // Initialize toggle from settings (default: true for backwards compat)
     var toggle = document.getElementById("forceChromeToggle");
-    var slider = document.getElementById("chromeSlider");
-    function updateSlider() {
-      slider.style.background = toggle.checked ? "#0078d4" : "#555";
-    }
     toggle.checked = settings.forceChrome !== false;
-    updateSlider();
-    toggle.addEventListener("change", function () {
-      settings.forceChrome = toggle.checked;
-      updateSlider();
-      saveSettings();
-    });
 
     websocket = new WebSocket("ws://127.0.0.1:" + port);
 
@@ -147,7 +189,6 @@
         event: registerEvent,
         uuid: uuid
       }));
-      // Ask plugin for calendar list
       sendToPlugin({ action: "listCalendars" });
     };
 
@@ -156,7 +197,6 @@
       if (data.event === "didReceiveSettings") {
         settings = data.payload.settings || {};
         toggle.checked = settings.forceChrome !== false;
-        updateSlider();
       }
       if (data.event === "sendToPropertyInspector") {
         var payload = data.payload || {};
@@ -220,7 +260,6 @@
     container.innerHTML = html;
     calendarsLoaded = true;
 
-    // Bind change events
     var checkboxes = container.querySelectorAll("input[type=checkbox]");
     checkboxes.forEach(function (cb) {
       cb.addEventListener("change", onCalendarToggle);
@@ -256,6 +295,10 @@
       document.getElementById("statusBar").className = "";
     });
 
+    document.getElementById("forceChromeToggle").addEventListener("change", function () {
+      settings.forceChrome = this.checked;
+      saveSettings();
+    });
   });
 </script>
 </body>

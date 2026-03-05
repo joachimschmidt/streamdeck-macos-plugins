@@ -1,0 +1,17 @@
+{
+  "name": "sd-calendar-lcd",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "install-plugin": "bash install.sh"
+  },
+  "dependencies": {
+    "@elgato/streamdeck": "^1.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "esbuild": "^0.24.0",
+    "@types/node": "^20.0.0"
+  }
+}

@@ -15,6 +15,7 @@ import { SystemCalendarService, CalendarEvent, CalendarInfo } from "./google-cal
 
 type CalendarSettings = {
   calendarIds?: string; // comma-separated calendar identifiers
+  forceChrome?: boolean;
 };
 
 interface InstanceState {
@@ -75,11 +76,21 @@ export class CalendarAction extends SingletonAction<CalendarSettings> {
 
   private openCurrentMeeting(actionId: string): void {
     const state = this.instances.get(actionId);
-    if (!state || state.events.length === 0) return;
+    if (!state) return;
+
+    // No events: open Calendar app
+    if (state.events.length === 0) {
+      exec('open -a "Calendar"');
+      return;
+    }
 
     const event = state.events[state.currentIndex];
     if (event?.meetingUrl) {
-      exec(`open -a "Google Chrome" "${event.meetingUrl}"`);
+      const useChrome = state.settings.forceChrome !== false;
+      const cmd = useChrome
+        ? `open -a "Google Chrome" "${event.meetingUrl}"`
+        : `open "${event.meetingUrl}"`;
+      exec(cmd);
     }
   }
 
@@ -187,7 +198,7 @@ export class CalendarAction extends SingletonAction<CalendarSettings> {
         meetingIcon: "\u{1F4C5}",
         title: "All clear",
         timeUntil: "No more events today",
-        status: "",
+        status: "Tap to open Calendar",
       });
       return;
     }

@@ -1,6 +1,6 @@
 # Stream Deck Plugins for macOS
 
-A collection of 7 custom Stream Deck plugins built with the [Elgato Stream Deck Node.js SDK](https://github.com/elgato/streamdeck) (`@elgato/streamdeck` v1.1). All plugins target macOS and run on Node.js 20.
+A collection of 8 custom Stream Deck plugins built with the [Elgato Stream Deck Node.js SDK](https://github.com/elgato/streamdeck) (`@elgato/streamdeck` v1.1). All plugins target macOS and run on Node.js 20.
 
 ## Preview
 
@@ -36,6 +36,7 @@ A collection of 7 custom Stream Deck plugins built with the [Elgato Stream Deck 
 | **[sd-memory-monitor](#sd-memory-monitor)** | Keypad | RAM, swap, and memory pressure display |
 | **[sd-claude-approve](#sd-claude-approve)** | Keypad | Physical approve button for [Claude Code](https://claude.ai/code) permission requests via `PermissionRequest` hook |
 | **[sd-calendar-events](#sd-calendar-events)** | Encoder | Browse today's calendar events and join meetings with a dial press |
+| **[sd-calendar-lcd](#sd-calendar-lcd)** | Keypad | Today's calendar events on an LCD key with tap-to-cycle and hold-to-join |
 | **[sd-mqtt-dimmer](#sd-mqtt-dimmer)** | Encoder | Control Zigbee lights via MQTT/Zigbee2MQTT with dial rotation |
 | **[sd-ha-graph](#sd-ha-graph)** | Keypad + Encoder | Home Assistant sensor history as line graphs with color-coded values |
 
@@ -151,7 +152,22 @@ Displays today's calendar events on the Stream Deck+ dial. Rotate to browse even
 **Permissions required:**
 - **Calendar access** — macOS will prompt for calendar permission on first run. Grant access in System Settings > Privacy & Security > Calendars.
 
-**Settings:** Select which calendars to display.
+**Settings:** Select which calendars to display, toggle "Force Google Chrome" for meeting links.
+
+---
+
+### sd-calendar-lcd
+
+Displays today's calendar events on a standard Stream Deck LCD key. Short press to cycle through events, long press to join the associated meeting. When no events remain, tapping opens the Calendar app.
+
+**How it works:** Uses the same compiled Swift helper (`CalendarHelper.app`) and EventKit pipeline as sd-calendar-events. Events are rendered as SVG with color-coded time indicators (green = ongoing, orange = starting within 15 min).
+
+**Additional dependencies:** None (Swift helper is compiled during build).
+
+**Permissions required:**
+- **Calendar access** — macOS will prompt for calendar permission on first run. Grant access in System Settings > Privacy & Security > Calendars.
+
+**Settings:** Select which calendars to display, toggle "Force Google Chrome" for meeting links.
 
 ---
 
@@ -207,12 +223,13 @@ All plugins use macOS-specific tools (`system_profiler`, `ioreg`, `vm_stat`, `to
 | sd-memory-monitor | Yes | Yes | Page size detected dynamically via `sysctl hw.pagesize`. |
 | sd-claude-approve | Yes | Yes | Pure Node.js, no architecture dependency. |
 | sd-calendar-events | Yes | Yes | Swift helper built as universal binary (ARM64 + x86_64). |
+| sd-calendar-lcd | Yes | Yes | Swift helper built as universal binary (ARM64 + x86_64). |
 | sd-mqtt-dimmer | Yes | Yes | Pure Node.js, no architecture dependency. |
 | sd-ha-graph | Yes | Yes | Pure Node.js, no architecture dependency. |
 
 ### Known Limitations
 
-- **sd-calendar-events** opens meeting links exclusively in Google Chrome. Other browsers are not supported.
+- **sd-calendar-events** and **sd-calendar-lcd** default to opening meeting links in Google Chrome. Disable "Force Google Chrome" in settings to use your default browser.
 - **sd-bt-connect** requires `blueutil` to be installed via Homebrew.
 - **sd-mqtt-dimmer** stores MQTT credentials as plaintext in Stream Deck settings.
 - **sd-ha-graph** stores the HA access token as plaintext in Stream Deck settings. History range is limited to what the HA recorder retains (default ~10 days).
