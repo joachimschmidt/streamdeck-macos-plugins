@@ -192,7 +192,7 @@ export class ClaudeApproveAction extends SingletonAction {
         state.currentRequestId = next.request_id;
         await action.setImage(svgDataUri(renderPending(next, queue.length)));
         await action.setTitle("");
-      } else if (state.currentRequestId) {
+      } else {
         state.currentRequestId = null;
         await this.showIdle(action);
       }
