@@ -1,6 +1,6 @@
 # Stream Deck Plugins for macOS
 
-A collection of 8 custom Stream Deck plugins built with the [Elgato Stream Deck Node.js SDK](https://github.com/elgato/streamdeck) (`@elgato/streamdeck` v1.1). All plugins target macOS and run on Node.js 20.
+A collection of 9 custom Stream Deck plugins built with the [Elgato Stream Deck Node.js SDK](https://github.com/elgato/streamdeck) (`@elgato/streamdeck` v1.1). All plugins target macOS and run on Node.js 20.
 
 ## Preview
 
@@ -13,10 +13,11 @@ A collection of 8 custom Stream Deck plugins built with the [Elgato Stream Deck 
   <img src="docs/images/preview-claude-approve-pending.svg" width="100" alt="Claude Approve (pending)">
   <img src="docs/images/preview-claude-approve-idle.svg" width="100" alt="Claude Approve (idle)">
   <img src="docs/images/preview-calendar-lcd.svg" width="100" alt="Calendar LCD">
+  <img src="docs/images/preview-claude-usage.svg" width="100" alt="Claude Usage">
   <img src="docs/images/preview-ha-graph-keypad.svg" width="100" alt="HA Sensor Graph (button)">
 </p>
 
-*Left to right: Bluetooth Connect, CPU Monitor, Memory Monitor, Claude Approve (pending), Claude Approve (idle), Calendar LCD, HA Sensor Graph*
+*Left to right: Bluetooth Connect, CPU Monitor, Memory Monitor, Claude Approve (pending), Claude Approve (idle), Calendar LCD, Claude Usage, HA Sensor Graph*
 
 ### Encoder Plugins (Stream Deck+ dials)
 
@@ -38,6 +39,7 @@ A collection of 8 custom Stream Deck plugins built with the [Elgato Stream Deck 
 | **[sd-claude-approve](#sd-claude-approve)** | Keypad | Physical approve button for [Claude Code](https://claude.ai/code) permission requests via `PermissionRequest` hook |
 | **[sd-calendar-events](#sd-calendar-events)** | Encoder | Browse today's calendar events and join meetings with a dial press |
 | **[sd-calendar-lcd](#sd-calendar-lcd)** | Keypad | Today's calendar events on an LCD key with tap-to-cycle and hold-to-join |
+| **[sd-claude-usage](#sd-claude-usage)** | Keypad | Real-time Claude rate limit utilization (5h/7d windows) via API |
 | **[sd-mqtt-dimmer](#sd-mqtt-dimmer)** | Encoder | Control Zigbee lights via MQTT/Zigbee2MQTT with dial rotation |
 | **[sd-ha-graph](#sd-ha-graph)** | Keypad + Encoder | Home Assistant sensor history as line graphs with color-coded values |
 
@@ -140,6 +142,29 @@ A physical button to approve Claude Code permission requests. When Claude Code n
 
 ---
 
+### sd-claude-usage
+
+<img src="docs/images/preview-claude-usage.svg" width="72" alt="Claude Usage" align="right">
+
+Displays real-time Claude rate limit utilization for both the 5-hour and 7-day rolling windows. Shows exact usage percentage, reset countdown, and which window (5h or 7d) is the active constraint.
+
+**How it works:** Makes a minimal API call (1 Haiku output token) every 60 seconds using your Claude Code OAuth credentials from macOS Keychain. Reads the `anthropic-ratelimit-unified-*` response headers which contain exact utilization percentages and reset timestamps. Press the key to force refresh.
+
+**Display:**
+- Large percentage showing 5h window utilization
+- Color-coded status badge (IDLE / LOW / MED / HIGH / CRIT / LIMIT)
+- 5h progress bar + 7d progress bar
+- Reset time (clock) and countdown
+- Which window is the active rate limit constraint
+
+**Requirements:**
+- [Claude Code](https://code.claude.com) authenticated via `claude.ai` (OAuth) — the plugin reads the token from macOS Keychain
+- Works with any Claude subscription (Pro, Max 5x, Max 20x, Team)
+
+**Additional dependencies:** None.
+
+---
+
 ### sd-calendar-events
 
 <img src="docs/images/preview-calendar-events.svg" width="140" alt="Calendar Events" align="right">
@@ -225,6 +250,7 @@ All plugins use macOS-specific tools (`system_profiler`, `ioreg`, `vm_stat`, `to
 | sd-cpu-monitor | Yes | Yes | Uses universal macOS commands. GPU metrics depend on IOAccelerator availability. |
 | sd-memory-monitor | Yes | Yes | Page size detected dynamically via `sysctl hw.pagesize`. |
 | sd-claude-approve | Yes | Yes | Pure Node.js, no architecture dependency. |
+| sd-claude-usage | Yes | Yes | Pure Node.js. Reads OAuth token from macOS Keychain. |
 | sd-calendar-events | Yes | Yes | Swift helper built as universal binary (ARM64 + x86_64). |
 | sd-calendar-lcd | Yes | Yes | Swift helper built as universal binary (ARM64 + x86_64). |
 | sd-mqtt-dimmer | Yes | Yes | Pure Node.js, no architecture dependency. |

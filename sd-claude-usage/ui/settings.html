@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Claude Usage Settings</title>
+  <style>
+    body { font-family: -apple-system, sans-serif; background: #2c2c2c; color: #ccc; padding: 12px; margin: 0; font-size: 13px; }
+    .info { margin-bottom: 12px; padding: 8px; background: #1a1a1a; border-radius: 6px; }
+    .info p { margin: 4px 0; }
+    .hint { font-size: 11px; color: #888; }
+  </style>
+</head>
+<body>
+  <div class="info">
+    <p><strong>Claude Usage Monitor</strong></p>
+    <p class="hint">Shows real-time 5h and 7d usage from Anthropic rate limit headers.</p>
+    <p class="hint">Polls every 60s using a 1-token Haiku call.</p>
+    <p class="hint">Press the key to force refresh.</p>
+    <p class="hint">Reads OAuth token from macOS Keychain (Claude Code credentials).</p>
+  </div>
+
+  <script>
+    window.connectElgatoStreamDeckSocket = () => {};
+  </script>
+</body>
+</html>

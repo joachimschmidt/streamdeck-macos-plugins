@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-Monorepo of 7 Stream Deck plugins for macOS, built with the Elgato Stream Deck Node.js SDK (`@elgato/streamdeck` v1.1). Each plugin is a self-contained directory with its own `package.json`, build script, and install script. All plugins target macOS only and run on Node.js 20.
+Monorepo of 9 Stream Deck plugins for macOS, built with the Elgato Stream Deck Node.js SDK (`@elgato/streamdeck` v1.1). Each plugin is a self-contained directory with its own `package.json`, build script, and install script. All plugins target macOS only and run on Node.js 20.
 
 ## Plugins
 
@@ -14,7 +14,9 @@ Monorepo of 7 Stream Deck plugins for macOS, built with the Elgato Stream Deck N
 | `sd-cpu-monitor` | Keypad | CPU/GPU usage display (via `top` and `ioreg`) |
 | `sd-memory-monitor` | Keypad | RAM/swap/pressure display (via `vm_stat`, `sysctl`, `memory_pressure`) |
 | `sd-claude-approve` | Keypad | Physical approve button for Claude Code tool calls (file-based IPC) |
+| `sd-claude-usage` | Keypad | Real-time Claude rate limit utilization via API headers |
 | `sd-calendar-events` | Encoder (dial) | Today's calendar events with meeting join (uses Swift EventKit helper) |
+| `sd-calendar-lcd` | Keypad | Today's calendar events on LCD key with tap-to-cycle |
 | `sd-mqtt-dimmer` | Encoder (dial) | Zigbee light dimmer via MQTT/Zigbee2MQTT |
 | `sd-ha-graph` | Keypad + Encoder | Home Assistant sensor history graphs via WebSocket + REST API |
 
@@ -45,11 +47,12 @@ The build script (`build.mjs`) in each plugin:
 - `src/plugin.ts`: registers the action and calls `streamDeck.connect()`
 - `src/<name>-action.ts`: the `SingletonAction` subclass with `@action()` decorator containing all logic
 
-**Display rendering** — Keypad plugins (bt-connect, cpu-monitor, memory-monitor, claude-approve) render SVG strings, convert to base64 data URIs, and set via `action.setImage()`. Encoder plugins (calendar-events, mqtt-dimmer) use `action.setFeedback()` with layout fields.
+**Display rendering** — Keypad plugins (bt-connect, cpu-monitor, memory-monitor, claude-approve, claude-usage) render SVG strings, convert to base64 data URIs, and set via `action.setImage()`. Encoder plugins (calendar-events, mqtt-dimmer) use `action.setFeedback()` with layout fields.
 
 **External dependencies**:
 - `sd-bt-connect`: requires `blueutil` at `/opt/homebrew/bin/blueutil` and a compiled Swift `bt-info` binary
 - `sd-calendar-events`: requires a compiled Swift `CalendarHelper.app` bundle with macOS calendar permissions
+- `sd-claude-usage`: reads OAuth token from macOS Keychain (`Claude Code-credentials`), makes lightweight API calls to get rate limit headers
 - `sd-mqtt-dimmer`: uses the `mqtt` npm package to communicate with a Zigbee2MQTT broker
 
 **IPC** — `sd-claude-approve` uses file-based IPC: polls `/tmp/claude-sd-pending.json` for pending tool calls, writes approval to `/tmp/claude-sd-response`.
