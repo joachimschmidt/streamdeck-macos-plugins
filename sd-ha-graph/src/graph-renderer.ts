@@ -238,6 +238,11 @@ export function renderKeypadGraph(
   colorRange?: ColorRange,
   freezeScale?: boolean
 ): string {
+  const windowMsMap: Record<Timeframe, number | undefined> = {
+    "1min": 60 * 1000,
+    "1hr": 60 * 60 * 1000,
+    "1day": 24 * 60 * 60 * 1000,
+  };
   return renderGraph(points, {
     width: 144,
     height: 144,
@@ -245,6 +250,7 @@ export function renderKeypadGraph(
     currentValue,
     timeLabel: TIMEFRAME_LABELS[timeframe],
     showBackground: true,
+    windowMs: windowMsMap[timeframe],
     reverseColors,
     unit,
     historicalMin: colorRange?.min,
