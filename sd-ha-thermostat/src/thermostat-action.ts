@@ -16,6 +16,7 @@ interface ClimateState {
   hvacAction: string;
   targetTemp: number;
   currentTemp: number;
+  currentHumidity: number | null;
   minTemp: number;
   maxTemp: number;
   stepSize: number;
@@ -75,6 +76,7 @@ function parseClimateState(entity: any): ClimateState {
     hvacAction: attrs.hvac_action ?? "idle",
     targetTemp: attrs.temperature ?? 20,
     currentTemp: attrs.current_temperature ?? 0,
+    currentHumidity: attrs.current_humidity != null ? Number(attrs.current_humidity) : null,
     minTemp: attrs.min_temp ?? 5,
     maxTemp: attrs.max_temp ?? 35,
     stepSize: attrs.target_temp_step ?? 0.5,
@@ -95,6 +97,7 @@ export class ThermostatAction extends SingletonAction<HaThermostatSettings> {
         hvacAction: "idle",
         targetTemp: 20,
         currentTemp: 0,
+        currentHumidity: null,
         minTemp: 5,
         maxTemp: 35,
         stepSize: 0.5,
@@ -244,7 +247,8 @@ export class ThermostatAction extends SingletonAction<HaThermostatSettings> {
     const { climate, displayName } = state;
     const icon = thermostatIcon(climate.hvacMode, climate.hvacAction);
 
-    const currentStr = `${climate.currentTemp.toFixed(1)}°`;
+    const humidityStr = climate.currentHumidity != null ? ` ${Math.round(climate.currentHumidity)}%` : "";
+    const currentStr = `${climate.currentTemp.toFixed(1)}°${humidityStr}`;
 
     let statusStr: string;
     if (climate.hvacMode === "off") {
