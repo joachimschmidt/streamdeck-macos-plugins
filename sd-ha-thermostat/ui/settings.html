@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>HA Thermostat Settings</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 12px;
+            color: #d8d8d8;
+            background: #2d2d2d;
+            margin: 0;
+            padding: 12px;
+        }
+        .sdpi-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .sdpi-item {
+            display: flex;
+            align-items: center;
+            min-height: 28px;
+        }
+        .sdpi-item label {
+            flex: 0 0 90px;
+            text-align: right;
+            padding-right: 10px;
+            font-weight: 500;
+        }
+        .sdpi-item input {
+            flex: 1;
+            background: #3b3b3b;
+            border: 1px solid #555;
+            color: #d8d8d8;
+            padding: 5px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-family: inherit;
+        }
+        .sdpi-item input:focus {
+            border-color: #0078d4;
+            outline: none;
+        }
+        .sdpi-heading {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #999;
+            margin-top: 6px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #444;
+        }
+        .sdpi-hint {
+            font-size: 10px;
+            color: #888;
+            padding-left: 100px;
+            margin-top: -4px;
+        }
+        .sdpi-shared {
+            font-size: 10px;
+            color: #6a6;
+            padding-left: 100px;
+            margin-top: -4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sdpi-wrapper">
+        <div class="sdpi-heading">Home Assistant</div>
+
+        <div class="sdpi-item">
+            <label>HA URL</label>
+            <input id="haUrl" type="text" placeholder="http://homeassistant.local:8123">
+        </div>
+        <div class="sdpi-hint" id="haUrlHint">Shared across all HA actions</div>
+
+        <div class="sdpi-item">
+            <label>Access Token</label>
+            <input id="haToken" type="password" placeholder="Long-lived access token">
+        </div>
+        <div class="sdpi-hint" id="haTokenHint">Shared across all HA actions</div>
+
+        <div class="sdpi-heading">Thermostat</div>
+
+        <div class="sdpi-item">
+            <label>Entity ID</label>
+            <input id="entityId" type="text" placeholder="climate.living_room">
+        </div>
+
+        <div class="sdpi-item">
+            <label>Display Name</label>
+            <input id="displayName" type="text" placeholder="(optional)">
+        </div>
+        <div class="sdpi-hint">Label shown on the dial</div>
+
+        <div class="sdpi-heading">Behavior</div>
+
+        <div class="sdpi-item">
+            <label>Step Size</label>
+            <input id="stepSize" type="text" placeholder="0.5">
+        </div>
+        <div class="sdpi-hint">Temperature change per dial tick (default: from HA)</div>
+    </div>
+
+    <script>
+        let websocket = null;
+        let piUUID = null;
+        let settings = {};
+        let globalSettings = {};
+
+        const FIELDS = ["haUrl", "haToken", "entityId", "displayName", "stepSize"];
+        const SHARED_FIELDS = ["haUrl", "haToken"];
+
+        function connectElgatoStreamDeckSocket(port, uuid, registerEvent, info, actionInfo) {
+            piUUID = uuid;
+            const actionData = JSON.parse(actionInfo);
+            settings = actionData.payload.settings || {};
+
+            websocket = new WebSocket("ws://127.0.0.1:" + port);
+
+            websocket.onopen = function () {
+                websocket.send(JSON.stringify({
+                    event: registerEvent,
+                    uuid: uuid
+                }));
+                websocket.send(JSON.stringify({
+                    event: "getGlobalSettings",
+                    context: uuid
+                }));
+                loadSettings();
+            };
+
+            websocket.onmessage = function (evt) {
+                const data = JSON.parse(evt.data);
+                if (data.event === "didReceiveSettings") {
+                    settings = data.payload.settings || {};
+                    loadSettings();
+                }
+                if (data.event === "didReceiveGlobalSettings") {
+                    globalSettings = data.payload.settings || {};
+                    loadSettings();
+                }
+            };
+        }
+
+        function loadSettings() {
+            for (const field of FIELDS) {
+                const el = document.getElementById(field);
+                if (!el) continue;
+                if (SHARED_FIELDS.includes(field)) {
+                    el.value = settings[field] || globalSettings[field] || "";
+                    const hint = document.getElementById(field + "Hint");
+                    if (hint && !settings[field] && globalSettings[field]) {
+                        hint.textContent = "Using shared value";
+                        hint.className = "sdpi-shared";
+                    }
+                } else {
+                    el.value = settings[field] || "";
+                }
+            }
+        }
+
+        function saveSettings() {
+            settings = {};
+            for (const field of FIELDS) {
+                const el = document.getElementById(field);
+                if (el && el.value) settings[field] = el.value;
+            }
+
+            if (websocket && websocket.readyState === WebSocket.OPEN) {
+                websocket.send(JSON.stringify({
+                    event: "setSettings",
+                    context: piUUID,
+                    payload: settings
+                }));
+                const newGlobal = Object.assign({}, globalSettings);
+                for (const field of SHARED_FIELDS) {
+                    if (settings[field]) newGlobal[field] = settings[field];
+                }
+                globalSettings = newGlobal;
+                websocket.send(JSON.stringify({
+                    event: "setGlobalSettings",
+                    context: piUUID,
+                    payload: newGlobal
+                }));
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            for (const field of FIELDS) {
+                const el = document.getElementById(field);
+                if (el) el.addEventListener("input", saveSettings);
+            }
+        });
+    </script>
+</body>
+</html>

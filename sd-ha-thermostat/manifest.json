@@ -1,0 +1,48 @@
+{
+  "Actions": [
+    {
+      "Controllers": ["Encoder"],
+      "Encoder": {
+        "layout": "layouts/thermostat.json",
+        "TriggerDescription": {
+          "Rotate": "Adjust temperature",
+          "Push": "Toggle heat / off",
+          "Touch": "Toggle heat / off"
+        }
+      },
+      "Icon": "imgs/action",
+      "Name": "HA Thermostat",
+      "PropertyInspector": "ui/settings.html",
+      "States": [
+        {
+          "Image": "imgs/action"
+        }
+      ],
+      "UUID": "com.local.ha-thermostat.thermostat"
+    }
+  ],
+  "Author": "Local",
+  "Category": "Home Assistant",
+  "CategoryIcon": "imgs/category",
+  "CodePath": "bin/plugin.js",
+  "PropertyInspectorPath": "ui/settings.html",
+  "Description": "Control Home Assistant thermostat via dial",
+  "Icon": "imgs/plugin",
+  "Name": "HA Thermostat",
+  "Nodejs": {
+    "Version": "20",
+    "Debug": "enabled"
+  },
+  "OS": [
+    {
+      "Platform": "mac",
+      "MinimumVersion": "10.15"
+    }
+  ],
+  "SDKVersion": 2,
+  "Software": {
+    "MinimumVersion": "6.4"
+  },
+  "UUID": "com.local.ha-thermostat",
+  "Version": "0.1.0"
+}

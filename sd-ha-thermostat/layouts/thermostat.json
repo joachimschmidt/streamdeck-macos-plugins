@@ -1,0 +1,43 @@
+{
+  "id": "com.local.ha-thermostat.layout.thermostat",
+  "items": [
+    {
+      "key": "label",
+      "type": "text",
+      "rect": [8, 4, 184, 18],
+      "font": {
+        "size": 14,
+        "weight": 600
+      },
+      "alignment": "left",
+      "color": "#CCCCCC"
+    },
+    {
+      "key": "icon",
+      "type": "pixmap",
+      "rect": [4, 28, 48, 48]
+    },
+    {
+      "key": "value",
+      "type": "text",
+      "rect": [52, 24, 144, 30],
+      "font": {
+        "size": 24,
+        "weight": 700
+      },
+      "alignment": "center",
+      "color": "#FFFFFF"
+    },
+    {
+      "key": "status",
+      "type": "text",
+      "rect": [52, 56, 144, 16],
+      "font": {
+        "size": 12,
+        "weight": 500
+      },
+      "alignment": "center",
+      "color": "#888888"
+    }
+  ]
+}

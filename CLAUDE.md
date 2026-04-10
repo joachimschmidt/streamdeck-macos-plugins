@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-Monorepo of 9 Stream Deck plugins for macOS, built with the Elgato Stream Deck Node.js SDK (`@elgato/streamdeck` v1.1). Each plugin is a self-contained directory with its own `package.json`, build script, and install script. All plugins target macOS only and run on Node.js 20.
+Monorepo of 10 Stream Deck plugins for macOS, built with the Elgato Stream Deck Node.js SDK (`@elgato/streamdeck` v1.1). Each plugin is a self-contained directory with its own `package.json`, build script, and install script. All plugins target macOS only and run on Node.js 20.
 
 ## Plugins
 
@@ -19,6 +19,7 @@ Monorepo of 9 Stream Deck plugins for macOS, built with the Elgato Stream Deck N
 | `sd-calendar-lcd` | Keypad | Today's calendar events on LCD key with tap-to-cycle |
 | `sd-mqtt-dimmer` | Encoder (dial) | Zigbee light dimmer via MQTT/Zigbee2MQTT |
 | `sd-ha-graph` | Keypad + Encoder | Home Assistant sensor history graphs via WebSocket + REST API |
+| `sd-ha-thermostat` | Encoder (dial) | Home Assistant thermostat control via WebSocket (set temp, toggle mode) |
 
 ## Build & Install
 

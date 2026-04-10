@@ -1,6 +1,6 @@
 # Stream Deck Plugins for macOS
 
-A collection of 9 custom Stream Deck plugins built with the [Elgato Stream Deck Node.js SDK](https://github.com/elgato/streamdeck) (`@elgato/streamdeck` v1.1). All plugins target macOS and run on Node.js 20.
+A collection of 10 custom Stream Deck plugins built with the [Elgato Stream Deck Node.js SDK](https://github.com/elgato/streamdeck) (`@elgato/streamdeck` v1.1). All plugins target macOS and run on Node.js 20.
 
 ## Preview
 
@@ -25,9 +25,10 @@ A collection of 9 custom Stream Deck plugins built with the [Elgato Stream Deck 
   <img src="docs/images/preview-calendar-events.svg" width="200" alt="Calendar Events">
   <img src="docs/images/preview-mqtt-dimmer.svg" width="200" alt="MQTT Dimmer">
   <img src="docs/images/preview-ha-graph-encoder.svg" width="200" alt="HA Sensor Graph (dial)">
+  <img src="docs/images/preview-ha-thermostat.svg" width="200" alt="HA Thermostat">
 </p>
 
-*Left to right: Calendar Events, MQTT Dimmer, HA Sensor Graph*
+*Left to right: Calendar Events, MQTT Dimmer, HA Sensor Graph, HA Thermostat*
 
 ## Plugins
 
@@ -42,6 +43,7 @@ A collection of 9 custom Stream Deck plugins built with the [Elgato Stream Deck 
 | **[sd-claude-usage](#sd-claude-usage)** | Keypad | Real-time Claude rate limit utilization (5h/7d windows) via API |
 | **[sd-mqtt-dimmer](#sd-mqtt-dimmer)** | Encoder | Control Zigbee lights via MQTT/Zigbee2MQTT with dial rotation |
 | **[sd-ha-graph](#sd-ha-graph)** | Keypad + Encoder | Home Assistant sensor history as line graphs with color-coded values |
+| **[sd-ha-thermostat](#sd-ha-thermostat)** | Encoder | Control Home Assistant thermostat via dial with live temperature display |
 
 ## Requirements
 
@@ -234,6 +236,23 @@ Displays Home Assistant sensor history as color-coded line graphs. Supports both
 
 ---
 
+### sd-ha-thermostat
+
+<img src="docs/images/preview-ha-thermostat.svg" width="140" alt="HA Thermostat" align="right">
+
+Controls a Home Assistant climate entity via the Stream Deck+ dial. The display shows the current room temperature prominently, with the HVAC action and target temperature on the status line.
+
+**Encoder:** Rotate to adjust target temperature (respects min/max/step from HA). Press or touch to toggle between heat and off.
+
+**How it works:** Connects to Home Assistant via WebSocket for real-time state updates and service calls (`climate.set_temperature`, `climate.set_hvac_mode`). Icon color indicates mode: orange (heating), blue (cooling), green (idle), gray (off).
+
+**Additional dependencies:**
+- A running [Home Assistant](https://www.home-assistant.io/) instance with a long-lived access token.
+
+**Settings:** HA URL, access token (shared via global settings), entity ID, display name, step size override.
+
+---
+
 ## Compatibility Notes
 
 These plugins were developed on an Apple Silicon Mac and have several compatibility limitations:
@@ -255,6 +274,7 @@ All plugins use macOS-specific tools (`system_profiler`, `ioreg`, `vm_stat`, `to
 | sd-calendar-lcd | Yes | Yes | Swift helper built as universal binary (ARM64 + x86_64). |
 | sd-mqtt-dimmer | Yes | Yes | Pure Node.js, no architecture dependency. |
 | sd-ha-graph | Yes | Yes | Pure Node.js, no architecture dependency. |
+| sd-ha-thermostat | Yes | Yes | Pure Node.js, no architecture dependency. |
 
 ### Known Limitations
 
@@ -262,6 +282,7 @@ All plugins use macOS-specific tools (`system_profiler`, `ioreg`, `vm_stat`, `to
 - **sd-bt-connect** requires `blueutil` to be installed via Homebrew.
 - **sd-mqtt-dimmer** stores MQTT credentials as plaintext in Stream Deck settings.
 - **sd-ha-graph** stores the HA access token as plaintext in Stream Deck settings. History range is limited to what the HA recorder retains (default ~10 days).
+- **sd-ha-thermostat** stores the HA access token as plaintext in Stream Deck settings.
 
 ## Architecture
 
