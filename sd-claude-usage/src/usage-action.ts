@@ -47,7 +47,11 @@ function apiCall(token: string): Promise<{ body: any; headers: Record<string, st
         path: "/v1/messages",
         method: "POST",
         headers: {
-          "x-api-key": token,
+          // Claude Code stores an OAuth token (sk-ant-oat01-…). OAuth tokens
+          // must be sent as a Bearer credential with the oauth beta header —
+          // they are rejected (401) when passed via x-api-key.
+          "authorization": `Bearer ${token}`,
+          "anthropic-beta": "oauth-2025-04-20",
           "anthropic-version": "2023-06-01",
           "content-type": "application/json",
           "content-length": Buffer.byteLength(payload),
